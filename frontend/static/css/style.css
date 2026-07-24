@@ -1,0 +1,705 @@
+:root {
+    --primary: #1e40af;
+    --primary-dark: #1e3a8a;
+    --danger: #dc2626;
+    --success: #16a34a;
+    --bg: #f3f4f6;
+    --card: #ffffff;
+    --text: #111827;
+    --muted: #6b7280;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.login-container {
+    max-width: 380px;
+    margin: 10vh auto;
+    background: var(--card);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.login-container h1 { margin-bottom: 0.2rem; }
+
+form { text-align: left; margin-top: 1.5rem; }
+
+label { display: block; margin-bottom: 0.3rem; font-weight: 500; }
+
+input, select {
+    width: 100%;
+    padding: 0.65rem;
+    margin-bottom: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+button, .btn {
+    padding: 0.65rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover, .btn:hover { background: var(--primary-dark); }
+
+.error { color: var(--danger); font-size: 0.9rem; }
+.success { color: var(--success); }
+.hidden { display: none !important; }
+
+.navbar {
+    background: var(--primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand { font-size: 1.4rem; font-weight: bold; }
+
+.menu button { background: rgba(255,255,255,0.2); }
+
+.dashboard { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+.dashboard.full-width { max-width: none; padding: 1.5rem 0.5rem; }
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.card {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.hidden { display: none; }
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal.hidden { display: none; }
+
+.modal-content {
+    background: var(--card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    max-width: 420px;
+    width: 90%;
+    position: relative;
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.8rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.permissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.permissions-list label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    margin-bottom: 0;
+}
+
+.permissions-list input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.modal-actions { text-align: right; }
+
+.btn-secondary {
+    background: #6b7280;
+    margin-top: 0.5rem;
+}
+
+.btn-secondary:hover { background: #4b5563; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+
+th { background: #f9fafb; font-weight: 600; }
+
+.qr-reader video {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+}
+
+#reader { margin: 1rem 0; }
+
+/* Carteirinha escolar - formato cartão de crédito horizontal */
+.card-preview {
+    width: 85mm;
+    height: 53mm;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #cbd5e1;
+    box-sizing: border-box;
+}
+
+.sheet-page .card-preview {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: clamp(0.45rem, 1.1vw, 0.9rem);
+}
+
+.sheet-page .card-student-name {
+    font-size: clamp(0.85rem, 1.8vw, 1.15rem);
+}
+
+.sheet-page .card-class {
+    font-size: clamp(0.55rem, 1.2vw, 0.9rem);
+}
+
+.sheet-page .card-info .value,
+.sheet-page .card-block .value {
+    font-size: clamp(0.55rem, 1.1vw, 0.85rem);
+}
+
+.sheet-page .card-qrcode {
+    width: clamp(48px, 8vw, 74px);
+    height: clamp(48px, 8vw, 74px);
+}
+
+.sheet-page .card-footer {
+    font-size: clamp(0.35rem, 0.8vw, 0.55rem);
+}
+
+.card-header {
+    background: var(--primary);
+    color: white;
+    padding: 0.35rem 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.card-header .school-name {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 78%;
+}
+
+.card-header .system-name {
+    font-size: 0.65rem;
+    opacity: 0.9;
+}
+
+.card-body {
+    flex: 1;
+    padding: 0.45rem 0.65rem 0.35rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0.5rem;
+    position: relative;
+    min-height: 0;
+}
+
+.card-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 0.15rem;
+    text-align: left;
+    min-width: 0;
+}
+
+.card-student-name {
+    font-size: 12pt;
+    font-weight: 700;
+    color: var(--primary-dark);
+    line-height: 1.2;
+    text-align: left;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.card-class {
+    font-size: 9pt;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.card-line {
+    display: flex;
+    gap: 0.9rem;
+    justify-content: flex-start;
+    margin-top: auto;
+    padding-bottom: 0.2rem;
+}
+
+.card-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    align-items: flex-start;
+}
+
+.card-info .label,
+.card-block .label {
+    font-size: 6pt;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 0.05rem;
+}
+
+.card-info .value,
+.card-block .value {
+    font-size: 9pt;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.card-qrcode-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.1rem 0;
+    box-sizing: border-box;
+}
+
+.card-qrcode {
+    width: 80px;
+    height: 80px;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    box-sizing: border-box;
+    padding: 2px;
+    image-rendering: pixelated;
+}
+
+.card-qrcode-hint {
+    font-size: 5pt;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.1rem;
+    line-height: 1.1;
+    max-width: 80px;
+}
+
+.card-footer {
+    background: #f1f5f9;
+    padding: 0.2rem 0.6rem;
+    text-align: center;
+    font-size: 5.5pt;
+    color: var(--muted);
+    border-top: 1px solid #e2e8f0;
+    flex-shrink: 0;
+}
+
+/* compatibilidade com visualização única antiga */
+.card-center,
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.card-left {
+    display: none;
+}
+
+.no-photo .card-left {
+    display: none;
+}
+
+.card-photo {
+    display: none;
+}
+
+.card-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.card-controls label {
+    width: 100%;
+    margin-bottom: 0.2rem;
+}
+
+.card-controls select {
+    min-width: 240px;
+    margin-bottom: 0;
+}
+
+.page-summary {
+    background: var(--card);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    font-weight: 600;
+}
+
+.page-summary small {
+    display: block;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 0.2rem;
+}
+
+.sheet-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+.sheet-page {
+    background: white;
+    width: 297mm;
+    height: 210mm;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: repeat(3, 85mm);
+    grid-template-rows: repeat(3, 53mm);
+    gap: 7mm 8mm;
+    padding: 6mm 7mm;
+    align-content: start;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px dashed #94a3b8;
+    position: relative;
+    margin: 0 auto;
+    flex-shrink: 0;
+    transform-origin: top center;
+    transform: scale(var(--a4-scale, 1));
+}
+
+.sheet-page .card-preview {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: inherit;
+    transform: none;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.sheet-page .card-preview * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.sheet-page .card-qrcode {
+    width: 80px;
+    height: 80px;
+    max-width: none;
+    max-height: none;
+    image-rendering: pixelated;
+}
+
+.sheet-page .card-qrcode-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.sheet-page .card-student-name {
+    font-size: 12pt;
+    line-height: 1.1;
+}
+
+.sheet-page .card-class {
+    font-size: 9pt;
+}
+
+.sheet-page .card-info .value,
+.sheet-page .card-block .value {
+    font-size: 9pt;
+}
+
+.sheet-page .card-footer {
+    font-size: 5.5pt;
+}
+
+.sheet-page .card-header .school-name {
+    font-size: 7pt;
+}
+
+.sheet-page .card-header .system-name {
+    font-size: 6pt;
+}
+
+.sheet-page .card-block .label,
+.sheet-page .card-info .label {
+    font-size: 6pt;
+}
+
+.sheet-page::before {
+    content: attr(data-page-label);
+    position: absolute;
+    top: -1.2rem;
+    left: 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.card-sheet {
+    background: white;
+    padding: 6mm 7mm;
+    width: 297mm;
+    min-height: 210mm;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: repeat(3, 85mm);
+    grid-template-rows: repeat(3, 53mm);
+    gap: 7mm 8mm;
+    align-content: start;
+    justify-content: center;
+    box-sizing: border-box;
+    page-break-after: always;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--muted);
+    grid-column: 1 / -1;
+}
+
+.print-a4-page {
+    background: white;
+    width: 297mm;
+    height: 210mm;
+    box-sizing: border-box;
+    padding: 6mm 7mm;
+    display: grid;
+    grid-template-columns: repeat(3, 85mm);
+    grid-template-rows: repeat(3, 53mm);
+    gap: 7mm 8mm;
+    align-content: start;
+    justify-content: center;
+    page-break-after: always;
+    position: relative;
+}
+
+.print-a4-page .card-preview {
+    width: 85mm;
+    height: 53mm;
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    font-size: inherit;
+}
+
+.print-a4-page .card-qrcode {
+    width: 50px;
+    height: 50px;
+}
+
+.print-a4-page .card-student-name {
+    font-size: 1rem;
+    line-height: 1.1;
+}
+
+.print-a4-page .card-class {
+    font-size: 0.85rem;
+}
+
+.print-a4-page .card-info .value,
+.print-a4-page .card-block .value {
+    font-size: 0.8rem;
+}
+
+.print-a4-page .card-footer {
+    font-size: 0.5rem;
+}
+
+.print-a4-page .card-header .school-name {
+    font-size: 0.7rem;
+}
+
+.print-a4-page .card-header .system-name {
+    font-size: 0.65rem;
+}
+
+.print-a4-page .card-qrcode {
+    width: 22mm;
+    height: 22mm;
+    image-rendering: pixelated;
+}
+
+.print-a4-page .card-qrcode-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    min-width: 0;
+}
+
+.print-a4-page .card-student-name {
+    font-size: 12pt;
+    line-height: 1.1;
+}
+
+.print-a4-page .card-class {
+    font-size: 9pt;
+}
+
+.print-a4-page .card-info .value,
+.print-a4-page .card-block .value {
+    font-size: 9pt;
+}
+
+.print-a4-page .card-footer {
+    font-size: 5.5pt;
+}
+
+.print-a4-page .card-header .school-name {
+    font-size: 7pt;
+}
+
+.print-a4-page .card-header .system-name {
+    font-size: 6pt;
+}
+
+.print-a4-page .card-block .label,
+.print-a4-page .card-info .label {
+    font-size: 6pt;
+}
+
+.print-a4-page:last-child { page-break-after: auto; }
+
+@media print {
+    @page { size: A4 landscape; margin: 0; }
+    body { background: white; }
+    .no-print { display: none !important; }
+    .dashboard { padding: 0; max-width: none; }
+    .sheet-wrapper {
+        gap: 0;
+        padding: 0;
+        align-items: stretch;
+        display: block;
+        width: auto;
+        overflow: visible;
+    }
+    .sheet-page {
+        box-shadow: none;
+        border: none;
+        width: 297mm !important;
+        height: 210mm !important;
+        max-width: none;
+        transform: none !important;
+        margin: 0 !important;
+        padding: 6mm 7mm;
+        gap: 7mm 8mm;
+        page-break-after: always;
+        box-sizing: border-box;
+        border-radius: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 85mm);
+        grid-template-rows: repeat(3, 53mm);
+        flex-shrink: 0;
+    }
+    .sheet-page::before { display: none; }
+    .sheet-page:last-child { page-break-after: auto; }
+    .sheet-page .card-preview {
+        width: 85mm !important;
+        height: 53mm !important;
+        font-size: inherit;
+        page-break-inside: avoid;
+        box-sizing: border-box;
+    }
+    .card-sheet {
+        box-shadow: none;
+        width: 297mm;
+        min-height: 210mm;
+        padding: 6mm 7mm;
+        gap: 7mm 8mm;
+        page-break-after: always;
+        box-sizing: border-box;
+    }
+    .card-sheet:last-child { page-break-after: auto; }
+}

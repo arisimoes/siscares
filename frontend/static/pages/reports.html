@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Relatórios</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Relatório de Frequência</h2>
+        <input type="month" id="month" value="2026-07">
+        <button onclick="loadReport()">Gerar</button>
+
+        <table id="reportTable" style="display:none">
+            <thead>
+                <tr><th>Turma</th><th>Aluno</th><th>Total</th><th>Presenças</th><th>Faltas</th><th>Justificadas</th><th>%</th></tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+        </table>
+    </main>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/reports.js"></script>
+</body>
+</html>

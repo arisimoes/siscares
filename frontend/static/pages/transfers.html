@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Transferências</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Registrar Transferência</h2>
+        <form id="transferForm">
+            <select id="student_id" required></select>
+            <select id="to_class_id"><option value="">Transferência externa (sem turma)</option></select>
+            <select id="transfer_type">
+                <option value="internal">Interna</option>
+                <option value="external">Externa</option>
+            </select>
+            <textarea id="reason" placeholder="Motivo"></textarea>
+            <button type="submit">Registrar</button>
+        </form>
+    </main>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/transfers.js"></script>
+</body>
+</html>

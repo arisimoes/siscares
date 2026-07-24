@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Login</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <h1>SisCares</h1>
+        <p>Sistema de Carteirinha Escolar &amp; Controle de Frequência</p>
+        <form id="loginForm">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" required autofocus>
+
+            <label for="password">Senha</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Entrar</button>
+        </form>
+        <p id="errorMsg" class="error"></p>
+    </div>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/auth.js"></script>
+</body>
+</html>

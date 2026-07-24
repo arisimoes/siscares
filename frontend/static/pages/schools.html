@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Escolas</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Escolas</h2>
+        <form id="schoolForm">
+            <input type="text" id="name" placeholder="Nome da escola" required>
+            <input type="text" id="cnpj" placeholder="CNPJ">
+            <input type="text" id="phone" placeholder="Telefone">
+            <input type="text" id="city" placeholder="Cidade">
+            <input type="text" id="state" placeholder="UF" maxlength="2">
+            <button type="submit">Cadastrar</button>
+        </form>
+        <table>
+            <thead>
+                <tr><th>Nome</th><th>CNPJ</th><th>Cidade/UF</th><th>Ativa</th></tr>
+            </thead>
+            <tbody id="schoolsTable"></tbody>
+        </table>
+    </main>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/schools.js"></script>
+</body>
+</html>

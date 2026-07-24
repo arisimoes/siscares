@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Painel</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <span id="userName"></span>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <h2>Painel Administrativo</h2>
+
+        <section id="admin-modules" class="hidden">
+            <h3>Gestão de Módulos por Escola</h3>
+            <div id="moduleSchoolList"></div>
+        </section>
+
+        <section>
+            <h3>Cadastros Rápidos</h3>
+            <div class="cards">
+                <a id="nav-schools" href="/static/pages/schools.html" class="card">Escolas</a>
+                <a href="/static/pages/users.html" class="card">Funcionários</a>
+                <a href="/static/pages/classes.html" class="card">Turmas e Turnos</a>
+                <a href="/static/pages/students.html" class="card">Alunos</a>
+                <a href="/static/pages/card.html" class="card">Carteirinhas</a>
+                <a href="/static/pages/attendance.html" class="card">Chamada QR</a>
+                <a href="/static/pages/reports.html" class="card">Relatórios</a>
+                <a href="/static/pages/transfers.html" class="card">Transferências</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

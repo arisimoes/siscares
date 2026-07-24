@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Chamada QR</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Chamada via QR Code</h2>
+        <p id="shiftInfo"></p>
+
+        <div id="reader" class="qr-reader"></div>
+        <p id="statusMsg"></p>
+    </main>
+
+    <script src="/static/js/api.js?v=3"></script>
+    <script src="/static/js/attendance.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Turmas e Turnos</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Turnos</h2>
+        <form id="shiftForm">
+            <input type="text" id="shift_name" placeholder="Nome do turno" required>
+            <input type="time" id="start_time" required>
+            <input type="time" id="end_time" required>
+            <button type="submit">Adicionar</button>
+        </form>
+        <ul id="shiftsList"></ul>
+
+        <h2>Turmas</h2>
+        <form id="classForm">
+            <input type="text" id="class_name" placeholder="Nome da turma" required>
+            <input type="text" id="grade" placeholder="Ano/Série">
+            <input type="number" id="year" placeholder="Ano letivo" value="2026" required>
+            <button type="submit">Adicionar</button>
+        </form>
+        <ul id="classesList"></ul>
+    </main>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/classes.js"></script>
+</body>
+</html>

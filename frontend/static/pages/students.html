@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Alunos</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Alunos</h2>
+        <form id="studentForm">
+            <input type="text" id="full_name" placeholder="Nome completo" required>
+            <input type="date" id="birth_date" placeholder="Data de nascimento">
+            <input type="text" id="cpf" placeholder="CPF">
+            <input type="text" id="registration_code" placeholder="Matrícula">
+            <select id="class_id" required></select>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <table>
+            <thead>
+                <tr><th>Nome</th><th>Turma</th><th>Matrícula</th><th>Ações</th></tr>
+            </thead>
+            <tbody id="studentsTable"></tbody>
+        </table>
+    </main>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/students.js"></script>
+</body>
+</html>

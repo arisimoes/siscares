@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Carteirinha</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar no-print">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard full-width">
+        <h2>Carteirinhas</h2>
+
+        <section class="no-print card-controls">
+            <label for="classFilter">Turma</label>
+            <select id="classFilter">
+                <option value="">Selecione uma turma</option>
+            </select>
+            <button onclick="loadSheet()">Gerar folha A4</button>
+            <button class="btn-secondary" onclick="window.print()">Imprimir</button>
+            <button class="btn-secondary" onclick="exportPdf()">Exportar PDF</button>
+        </section>
+
+        <section class="no-print page-summary hidden" id="pageSummary">
+            <span id="totalCards">0</span> carteirinhas —
+            <span id="totalPages">0</span> página(s) A4
+            <small>(máx. <span id="cardsPerPage">0</span> por folha)</small>
+        </section>
+
+        <div id="cardSheet" class="sheet-wrapper">
+            <p class="empty-state">Selecione uma turma e clique em "Gerar folha A4".</p>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/card.js"></script>
+</body>
+</html>
