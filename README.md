@@ -42,11 +42,25 @@ O **SisCares** automatiza todo esse fluxo desde a portaria até a secretaria.
 
 *(Ajuste esta seção de acordo com as tecnologias exatas do seu projeto)*
 
-* **Backend:** `[Ex: Python / FastAPI / Node.js / Java]`
-* **Frontend:** `[Ex: React / HTML5 / JavaScript]`
-* **Banco de Dados:** `[Ex: PostgreSQL / SQLite]`
-* **Segurança & Rede:** HTTPS com Certificado SSL Interno (Self-signed) para suporte a chamadas da WebRTC/Camera API.
+* **Backend:** Python 3.10+ / FastAPI
+* **Frontend:** HTML5 / JavaScript vanilla
+* **Banco de Dados:** PostgreSQL
+* **ORM / Migrations:** SQLAlchemy / Alembic
+* **Segurança:** JWT (python-jose), bcrypt (passlib), criptografia simétrica dos QR Codes (Fernet)
+* **Leitura de QR:** html5-qrcode (navegador)
 * **Licença:** MIT License
+
+### 🔧 Controle Modular por Escola *(adendo)*
+
+O administrador do sistema (`super_admin`) define **quais módulos cada escola cadastrada pode utilizar**.
+
+Módulos disponíveis:
+
+* **core** — Gestão Escolar (sempre ativo)
+* **cards** — Carteirinhas com QR Code
+* **attendance** — Portaria / Chamada QR Code
+* **reports** — Relatórios de Frequência
+* **transfers** — Histórico de Transferências
 
 ---
 
@@ -54,11 +68,91 @@ O **SisCares** automatiza todo esse fluxo desde a portaria até a secretaria.
 
 ### Pré-requisitos
 * Git
-* `[Outro pré-requisito, ex: Docker, Python 3.x, Node.js]`
+* Python 3.10+
+* PostgreSQL 13+
 
 ### Passo a Passo
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/arisimoes/siscares.git](https://github.com/arisimoes/siscares.git)
-   cd siscares
+   git clone https://github.com/arisimoes/siscares.git
+   cd siscares/backend
+   ```
+
+2. **Crie e ative o ambiente virtual:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # venv\Scripts\activate    # Windows
+   ```
+
+3. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configure o banco PostgreSQL:**
+   ```bash
+   sudo -u postgres psql -c "CREATE USER siscares WITH PASSWORD 'siscares';"
+   sudo -u postgres psql -c "CREATE DATABASE siscares OWNER siscares;"
+   ```
+
+5. **Configure as variáveis de ambiente:**
+   ```bash
+   cp .env.example .env
+   # edite SECRET_KEY e CRYPTO_KEY com valores seguros
+   ```
+
+6. **Inicie o servidor:**
+   ```bash
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+7. **Crie o super-admin:**
+   ```bash
+   python scripts/create_superadmin.py --email admin@siscares.local --password admin123 --name "Administrador"
+   ```
+
+8. **Acesse o sistema:**
+   * Painel: http://localhost:8000/
+   * API docs: http://localhost:8000/docs
+
+---
+
+## 🔐 Segurança e HTTPS
+
+Para usar a câmera do navegador em produção, é necessário servir o sistema com **HTTPS**. Em servidor interno você pode usar:
+
+* Certificado autoassinado (self-signed) via OpenSSL
+* Reverso proxy com Nginx ou Caddy
+* Rede local com DNS interno e certificado gerenciado
+
+O leitor de QR funciona com `getUserMedia`, que requer contexto seguro (HTTPS ou localhost).
+
+---
+
+## 🗂️ Estrutura do Projeto
+
+```
+siscares/
+├── backend/
+│   ├── app/
+│   │   ├── core/          # config, security, crypto, module_guard
+│   │   ├── db/            # base, session, seed
+│   │   ├── models/        # SQLAlchemy models
+│   │   ├── routers/       # endpoints da API
+│   │   ├── schemas/       # Pydantic schemas
+│   │   ├── services/      # regras de negócio
+│   │   └── main.py        # aplicação FastAPI
+│   ├── alembic/           # migrations
+│   ├── scripts/           # utilitários (super-admin, demo)
+│   └── requirements.txt
+├── frontend/
+│   ├── templates/         # Jinja2 (login, index)
+│   └── static/            # CSS, JS, páginas HTML
+├── README.md
+└── LICENSE
+```
+
+---
+
