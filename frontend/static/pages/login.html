@@ -4,24 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SisCares - Login</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
 </head>
-<body>
-    <div class="login-container">
-        <h1>SisCares</h1>
-        <p>Sistema de Carteirinha Escolar &amp; Controle de Frequência</p>
-        <form id="loginForm">
-            <label for="login">Login</label>
-            <input type="text" id="login" name="login" required autofocus>
+<body class="login-page">
+    <div class="login-wrapper">
+        <div class="login-brand">
+            <div class="login-logo">🎓</div>
+            <h1>SisCares</h1>
+            <p>Sistema de Carteirinha Escolar &amp; Controle de Frequência</p>
+        </div>
 
-            <label for="password">Senha</label>
-            <input type="password" id="password" name="password" required>
+        <div class="login-card">
+            <h2>Acessar o sistema</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="login" name="login" placeholder="Login" required autofocus>
+                </div>
 
-            <button type="submit">Entrar</button>
-        </form>
-        <p id="errorMsg" class="error"></p>
+                <div class="input-group">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="password" name="password" placeholder="Senha" required>
+                </div>
+
+                <button type="submit" class="login-btn">Entrar</button>
+            </form>
+            <p id="errorMsg" class="error"></p>
+        </div>
+
+        <p class="login-footer">© SisCares — Gestão escolar inteligente</p>
     </div>
-    <script src="/static/js/api.js"></script>
+    <script src="/static/js/api.js?v=19"></script>
     <script src="/static/js/auth.js"></script>
 </body>
 </html>
