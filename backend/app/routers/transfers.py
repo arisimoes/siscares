@@ -27,7 +27,10 @@ def register_transfer(
         payload.from_class_id = student.class_id
         student.class_id = payload.to_class_id
 
-    transfer = TransferHistory(**payload.model_dump())
+    transfer = TransferHistory(
+        **payload.model_dump(),
+        registered_by_user_id=current_user.id,
+    )
     db.add(transfer)
     db.commit()
     db.refresh(transfer)

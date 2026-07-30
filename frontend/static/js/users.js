@@ -8,6 +8,7 @@ let currentPermissions = {
     manage_reports: false,
     manage_transfers: false,
     manage_users: false,
+    manage_calendar: false,
 };
 
 const PERM_FIELDS = [
@@ -18,12 +19,13 @@ const PERM_FIELDS = [
     { key: "manage_reports", id: "perm_reports" },
     { key: "manage_transfers", id: "perm_transfers" },
     { key: "manage_users", id: "perm_users" },
+    { key: "manage_calendar", id: "perm_calendar" },
 ];
 
 async function init() {
     currentUser = await getMe();
-    if (!["super_admin", "school_admin"].includes(currentUser.role)) {
-        alert("Acesso restrito.");
+    if (!currentUser || !["school_admin", "secretary"].includes(currentUser.role)) {
+        alert("Acesso restrito. Apenas gestores e secretários podem gerenciar funcionários.");
         window.location.href = "/static/pages/index.html";
         return;
     }
@@ -34,15 +36,7 @@ async function init() {
     // Ao mudar de papel, limpar permissões apenas se for novo cadastro
     document.getElementById("role").addEventListener("change", () => {
         if (!document.getElementById("userId").value) {
-            currentPermissions = {
-                manage_classes: false,
-                manage_students: false,
-                manage_cards: false,
-                manage_attendance: false,
-                manage_reports: false,
-                manage_transfers: false,
-                manage_users: false,
-            };
+            resetCurrentPermissions();
         }
         togglePermissionBtn();
     });
@@ -51,8 +45,7 @@ async function init() {
 async function loadUsers() {
     const users = await listUsers();
     allUsers = users.filter(u => {
-        if (currentUser.role === "super_admin") return true;
-        return u.school_id === currentUser.school_id && u.role !== "super_admin";
+        return u.school_id === currentUser.school_id && !["super_admin", "school_admin"].includes(u.role);
     });
     renderUsers();
 }
@@ -74,7 +67,7 @@ function renderUsers() {
 }
 
 function roleLabel(role) {
-    const labels = { staff: "Funcionário / Portaria", secretary: "Secretário(a) Escolar", school_admin: "Gestor Escolar" };
+    const labels = { staff: "Funcionário / Portaria", secretary: "Secretário(a) Escolar" };
     return labels[role] || role;
 }
 
@@ -110,13 +103,10 @@ async function saveUser(e) {
         email: document.getElementById("email").value,
         role: role,
         school_id: currentUser.school_id,
+        permissions: { ...currentPermissions },
     };
     const password = document.getElementById("password").value;
     if (password) payload.password = password;
-
-    if (role !== "school_admin") {
-        payload.permissions = { ...currentPermissions };
-    }
 
     try {
         if (id) {
@@ -140,15 +130,7 @@ window.editUser = function(id) {
     document.getElementById("role").value = u.role;
     document.getElementById("password").value = "";
 
-    currentPermissions = {
-        manage_classes: false,
-        manage_students: false,
-        manage_cards: false,
-        manage_attendance: false,
-        manage_reports: false,
-        manage_transfers: false,
-        manage_users: false,
-    };
+    resetCurrentPermissions();
     if (u.permissions) {
         Object.keys(currentPermissions).forEach(k => currentPermissions[k] = !!u.permissions[k]);
     }
@@ -168,6 +150,11 @@ window.toggleUserActive = async function(id, isActive) {
 window.resetForm = function() {
     document.getElementById("userForm").reset();
     document.getElementById("userId").value = "";
+    resetCurrentPermissions();
+    togglePermissionBtn();
+};
+
+function resetCurrentPermissions() {
     currentPermissions = {
         manage_classes: false,
         manage_students: false,
@@ -176,8 +163,8 @@ window.resetForm = function() {
         manage_reports: false,
         manage_transfers: false,
         manage_users: false,
+        manage_calendar: false,
     };
-    togglePermissionBtn();
-};
+}
 
 document.addEventListener("DOMContentLoaded", init);

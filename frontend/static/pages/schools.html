@@ -16,23 +16,43 @@
     </nav>
     <main class="dashboard">
         <h2>Escolas</h2>
-        <form id="schoolForm">
+        <form id="schoolForm" enctype="multipart/form-data">
+            <input type="hidden" id="school_id">
             <input type="text" id="name" placeholder="Nome da escola" required>
             <input type="text" id="cnpj" placeholder="CNPJ">
             <input type="text" id="phone" placeholder="Telefone">
             <input type="text" id="city" placeholder="Cidade">
             <input type="text" id="state" placeholder="UF" maxlength="2">
-            <button type="submit">Cadastrar</button>
+            <div class="inline-checkbox">
+                <label for="is_active">Ativa</label>
+                <input type="checkbox" id="is_active" checked>
+            </div>
+
+            <div class="form-section" id="photoSection">
+                <label>Imagem da carteirinha (logo/foto da escola):</label>
+                <input type="file" id="schoolPhoto" accept="image/png,image/jpeg,image/webp">
+                <div id="photoPreview" class="photo-preview hidden"></div>
+                <button type="button" id="removePhotoBtn" class="btn-danger hidden" onclick="removeSchoolPhoto()">Remover imagem</button>
+            </div>
+
+            <button type="submit" id="submitBtn">Cadastrar</button>
+            <button type="button" id="cancelEdit" class="hidden">Cancelar</button>
         </form>
+
+        <div id="modulesPanel" class="hidden">
+            <h3>Módulos da escola</h3>
+            <div id="modulesList"></div>
+        </div>
+
         <table>
             <thead>
-                <tr><th>Nome</th><th>CNPJ</th><th>Cidade/UF</th><th>Ativa</th></tr>
+                <tr><th>Nome</th><th>CNPJ</th><th>Cidade/UF</th><th>Ativa</th><th>Ações</th></tr>
             </thead>
             <tbody id="schoolsTable"></tbody>
         </table>
     </main>
 
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/schools.js"></script>
+    <script src="/static/js/api.js?v=18"></script>
+    <script src="/static/js/schools.js?v=18"></script>
 </body>
 </html>

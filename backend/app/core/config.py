@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480
     DATABASE_URL: str = "postgresql://siscares:siscares@localhost:5432/siscares"
     CRYPTO_KEY: str = "change-me-32-bytes-long-key!!"  # Must be 32 url-safe base64-encoded bytes for Fernet
+    UPLOAD_DIR: str = "../frontend/static/uploads"
+    MAX_UPLOAD_SIZE_MB: int = 5
     CORS_ORIGINS: str = "*"
 
     @property

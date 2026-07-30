@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -10,6 +10,7 @@ class SchoolBase(BaseModel):
     address: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None
+    photo_url: Optional[str] = None
 
 
 class SchoolCreate(SchoolBase):
@@ -24,6 +25,7 @@ class SchoolUpdate(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     is_active: Optional[bool] = None
+    photo_url: Optional[str] = None
 
 
 class SchoolResponse(SchoolBase):
@@ -32,6 +34,7 @@ class SchoolResponse(SchoolBase):
     id: int
     is_active: bool
     created_at: datetime
+    photo_url: Optional[str] = None
 
 
 class UserPermissionBase(BaseModel):
@@ -42,6 +45,8 @@ class UserPermissionBase(BaseModel):
     manage_reports: bool = False
     manage_transfers: bool = False
     manage_users: bool = False
+    manage_calendar: bool = False
+    manage_logs: bool = False
 
 
 class UserPermissionCreate(BaseModel):
@@ -52,10 +57,12 @@ class UserPermissionCreate(BaseModel):
     manage_reports: bool = False
     manage_transfers: bool = False
     manage_users: bool = False
+    manage_calendar: bool = False
+    manage_logs: bool = False
 
 
 class UserBase(BaseModel):
-    email: EmailStr
+    email: str
     full_name: str
     role: str
 
@@ -68,7 +75,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
-    email: Optional[EmailStr] = None
+    email: Optional[str] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
     school_id: Optional[int] = None
@@ -109,14 +116,18 @@ class ClassBase(BaseModel):
     year: int
 
 
-class ClassCreate(ClassBase):
-    pass
+class ClassCreate(BaseModel):
+    name: str
+    grade: Optional[str] = None
+    year: int
+    shift_id: Optional[int] = None
 
 
 class ClassUpdate(BaseModel):
     name: Optional[str] = None
     grade: Optional[str] = None
     year: Optional[int] = None
+    shift_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 
@@ -125,6 +136,8 @@ class ClassResponse(ClassBase):
 
     id: int
     school_id: int
+    shift_id: Optional[int] = None
+    shift_name: Optional[str] = None
     is_active: bool
     created_at: datetime
 
@@ -135,6 +148,7 @@ class StudentBase(BaseModel):
     cpf: Optional[str] = None
     registration_code: Optional[str] = None
     class_id: Optional[int] = None
+    bolsa_familia: bool = False
 
 
 class StudentCreate(StudentBase):
@@ -148,6 +162,7 @@ class StudentUpdate(BaseModel):
     registration_code: Optional[str] = None
     class_id: Optional[int] = None
     photo_url: Optional[str] = None
+    bolsa_familia: Optional[bool] = None
     is_active: Optional[bool] = None
 
 
@@ -161,7 +176,13 @@ class StudentResponse(StudentBase):
     is_active: bool
     created_at: datetime
     class_name: Optional[str] = None
+    shift_name: Optional[str] = None
     school_name: Optional[str] = None
+    school_photo_url: Optional[str] = None
+
+
+class StudentDeleteRequest(BaseModel):
+    password: str
 
 
 class AttendanceBase(BaseModel):
@@ -182,6 +203,12 @@ class AttendanceResponse(AttendanceBase):
     id: int
     registered_at: datetime
     registered_by_user_id: Optional[int]
+    justification: Optional[str] = None
+
+
+class JustifyAbsenceRequest(BaseModel):
+    date: str
+    justification: str
 
 
 class TransferHistoryBase(BaseModel):
@@ -201,6 +228,26 @@ class TransferHistoryResponse(TransferHistoryBase):
 
     id: int
     transferred_at: datetime
+    registered_by_user_id: Optional[int] = None
+    student_name: Optional[str] = None
+    from_class_name: Optional[str] = None
+    to_class_name: Optional[str] = None
+    registered_by_name: Optional[str] = None
+
+
+class LogEntry(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    type: str
+    student_id: int
+    student_name: str
+    date: Optional[str] = None
+    from_class_name: Optional[str] = None
+    to_class_name: Optional[str] = None
+    reason: Optional[str] = None
+    registered_by_name: Optional[str] = None
+    registered_at: datetime
 
 
 class ModuleBase(BaseModel):
@@ -231,13 +278,59 @@ class SchoolModuleSettingResponse(BaseModel):
     is_enabled: bool
 
 
+class AcademicYearBase(BaseModel):
+    year: int
+    start_date: str
+    end_date: str
+
+
+class AcademicYearCreate(AcademicYearBase):
+    pass
+
+
+class AcademicYearUpdate(BaseModel):
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class AcademicYearResponse(AcademicYearBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    school_id: int
+    is_active: bool
+
+
+class CalendarDayBase(BaseModel):
+    date: str
+    day_type: str = "school"  # school, holiday, event, weekend
+    description: Optional[str] = None
+
+
+class CalendarDayCreate(CalendarDayBase):
+    pass
+
+
+class CalendarDayUpdate(BaseModel):
+    day_type: Optional[str] = None
+    description: Optional[str] = None
+
+
+class CalendarDayResponse(CalendarDayBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    school_id: int
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 
 class LoginRequest(BaseModel):
-    username: EmailStr
+    login: str
     password: str
 
 

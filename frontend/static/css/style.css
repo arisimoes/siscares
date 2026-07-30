@@ -57,7 +57,15 @@ button:hover, .btn:hover { background: var(--primary-dark); }
 
 .error { color: var(--danger); font-size: 0.9rem; }
 .success { color: var(--success); }
+.warning { color: #b45309; }
 .hidden { display: none !important; }
+
+.module-hint {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
+}
 
 .navbar {
     background: var(--primary);
@@ -76,6 +84,10 @@ button:hover, .btn:hover { background: var(--primary-dark); }
 
 .dashboard.full-width { max-width: none; padding: 1.5rem 0.5rem; }
 
+.container { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+
+.container.full-width { max-width: none; padding: 1.5rem 0.5rem; }
+
 .cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -91,7 +103,7 @@ button:hover, .btn:hover { background: var(--primary-dark); }
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 .modal {
     position: fixed;
@@ -151,7 +163,204 @@ button:hover, .btn:hover { background: var(--primary-dark); }
 
 .btn-secondary:hover { background: #4b5563; }
 
-table {
+.btn-danger {
+    background: #dc2626;
+    margin-top: 0.5rem;
+}
+
+.btn-danger:hover { background: #b91c1c; }
+
+.btn-justify {
+    background: #f59e0b;
+    margin-top: 0.5rem;
+}
+
+.btn-justify:hover { background: #d97706; }
+
+.class-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.class-info { flex: 1; }
+
+.class-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.class-actions button,
+td.actions button,
+td.actions .btn {
+    margin-top: 0;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.form-actions button { margin-top: 0; }
+
+.form-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+}
+
+.form-inline input,
+.form-inline select {
+    flex: 1 1 180px;
+    margin-bottom: 0;
+}
+
+.form-inline button {
+    flex: 0 0 auto;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filters label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    gap: 0.25rem;
+}
+
+.filters input,
+.filters select {
+    margin-bottom: 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: normal;
+    margin-bottom: 1rem;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.inline-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.inline-checkbox label {
+    display: inline;
+    margin: 0;
+    font-weight: 500;
+}
+
+.inline-checkbox input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.module-school-card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.module-school-header {
+    background: var(--primary);
+    color: white;
+    padding: 1rem 1.25rem;
+}
+
+.module-school-name {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.module-school-sub {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    margin-top: 0.15rem;
+}
+
+.module-section {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.module-section:last-child {
+    border-bottom: none;
+}
+
+.module-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.75rem;
+}
+
+.module-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.5rem;
+}
+
+.module-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    font-weight: 500;
+}
+
+.module-item:hover {
+    background: #f3f4f6;
+}
+
+.module-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.module-item-core {
+    opacity: 0.7;
+    cursor: default;
+}
+
+.module-item-core:hover {
+    background: transparent;
+}
+
+#moduleSchoolList {
+    margin-top: 1rem;
+}
     width: 100%;
     border-collapse: collapse;
     background: var(--card);
@@ -170,7 +379,82 @@ th { background: #f9fafb; font-weight: 600; }
     border-radius: 8px;
 }
 
-#reader { margin: 1rem 0; }
+#reader { margin: 1rem 0; position: relative; }
+
+.scan-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.scan-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.scan-overlay.error {
+    background: rgba(254, 226, 226, 0.95);
+}
+
+.scan-overlay.error #overlayText {
+    color: var(--danger);
+}
+
+.scan-overlay.warning {
+    background: rgba(254, 249, 195, 0.95);
+}
+
+.scan-overlay.warning #overlayText {
+    color: #b45309;
+}
+
+.scan-overlay .ripple {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid rgba(22, 163, 74, 0.6);
+    animation: ripple 1.4s linear infinite;
+}
+
+.scan-overlay.error .ripple {
+    border-color: rgba(220, 38, 38, 0.5);
+}
+
+.scan-overlay.warning .ripple {
+    border-color: rgba(202, 138, 4, 0.5);
+}
+
+.scan-overlay .ripple-delay {
+    animation-delay: 0.4s;
+}
+
+.scan-overlay .ripple-delay-2 {
+    animation-delay: 0.8s;
+}
+
+@keyframes ripple {
+    0% { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(2.4); opacity: 0; }
+}
+
+.scan-overlay #overlayText {
+    position: relative;
+    z-index: 10;
+    margin-top: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--success);
+    text-align: center;
+}
 
 /* Carteirinha escolar - formato cartão de crédito horizontal */
 .card-preview {
@@ -211,12 +495,53 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .sheet-page .card-qrcode {
-    width: clamp(48px, 8vw, 74px);
-    height: clamp(48px, 8vw, 74px);
+    width: clamp(52px, 9vw, 78px);
+    height: clamp(52px, 9vw, 78px);
+    padding: 3px;
+    background: white;
+    image-rendering: auto;
 }
 
 .sheet-page .card-footer {
     font-size: clamp(0.35rem, 0.8vw, 0.55rem);
+}
+
+.sheet-page .card-school-photo-area {
+    width: 100px;
+    height: 62px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+}
+
+.sheet-page .card-school-photo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.sheet-page .card-school-photo.empty {
+    display: none;
+}
+
+@media print {
+    .sheet-page .card-school-photo-area {
+        width: 42mm;
+        height: 26mm;
+        border: none;
+        background: transparent;
+    }
+
+    .sheet-page .card-school-photo {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
 }
 
 .card-header {
@@ -286,6 +611,41 @@ th { background: #f9fafb; font-weight: 600; }
     margin-bottom: 0.25rem;
 }
 
+.card-school-photo-area {
+    width: 110px;
+    height: 68px;
+    border: none;
+    border-radius: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    margin: 0.1rem 0 0.2rem;
+    flex-shrink: 0;
+}
+
+.card-school-photo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.card-school-photo.empty {
+    display: none;
+}
+
+.sheet-page .card-school-photo-area {
+    width: 100px;
+    height: 62px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+}
+
 .card-line {
     display: flex;
     gap: 0.9rem;
@@ -334,8 +694,9 @@ th { background: #f9fafb; font-weight: 600; }
     max-height: 100%;
     object-fit: contain;
     box-sizing: border-box;
-    padding: 2px;
+    padding: 4px;
     image-rendering: pixelated;
+    background: white;
 }
 
 .card-qrcode-hint {
@@ -415,12 +776,37 @@ th { background: #f9fafb; font-weight: 600; }
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
     gap: 2rem;
     padding: 1rem 0;
     width: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
-    min-height: 0;
+}
+
+.sheet-wrapper .single-card {
+    margin: 0 auto;
+}
+
+@media print {
+    .sheet-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sheet-wrapper .single-card {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        box-shadow: none;
+    }
 }
 
 .sheet-page {
@@ -605,9 +991,36 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .print-a4-page .card-qrcode {
-    width: 22mm;
-    height: 22mm;
+    width: 24mm;
+    height: 24mm;
     image-rendering: pixelated;
+    padding: 1.5mm;
+    background: white;
+}
+
+.print-a4-page .card-school-photo-area {
+    width: 42mm;
+    height: 26mm;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.print-a4-page .card-school-photo {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+.print-a4-page .card-school-photo.empty {
+    display: none;
 }
 
 .print-a4-page .card-qrcode-wrap {

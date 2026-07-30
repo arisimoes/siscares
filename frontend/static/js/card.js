@@ -37,7 +37,7 @@ async function loadSheet() {
     }
 
     try {
-        const students = await listStudents(classId);
+        const students = await listStudents({ class_id: classId });
         if (!students.length) {
             container.innerHTML = "<p class='empty-state'>Nenhum aluno encontrado nesta turma.</p>";
             container.classList.add('sheet-wrapper');
@@ -59,6 +59,11 @@ async function loadSheet() {
             }
 
             const classDisplay = escapeHtml(s.class_name || "-") || "-";
+            const shiftText = s.shift_name ? ` - Turno: ${escapeHtml(s.shift_name)}` : "";
+            const classLine = `${classDisplay}${shiftText}`;
+            const schoolPhotoHtml = s.school_photo_url
+                ? `\u003cimg class="card-school-photo" src="${s.school_photo_url}" alt="Foto da escola"\u003e`
+                : `\u003cdiv class="card-school-photo empty"\u003e\u003c/div\u003e`;
 
             return `
                 <div class="card-preview">
@@ -69,7 +74,8 @@ async function loadSheet() {
                     <div class="card-body">
                         <div class="card-main">
                             <div class="card-student-name">${escapeHtml(s.full_name)}</div>
-                            <div class="card-class">${classDisplay}</div>
+                            <div class="card-class">${classLine}</div>
+                            <div class="card-school-photo-area">${schoolPhotoHtml}</div>
                             <div class="card-line">
                                 <div class="card-block">
                                     <div class="label">Matrícula</div>
@@ -162,9 +168,14 @@ async function renderSingleCard() {
         const validity = data.validity || `31/12/${new Date().getFullYear() + 1}`;
 
         const classDisplay = escapeHtml(data.class_name || "-") || "-";
+        const shiftText = data.shift_name ? ` - Turno: ${escapeHtml(data.shift_name)}` : "";
+        const classLine = `${classDisplay}${shiftText}`;
+        const schoolPhotoHtml = data.school_photo_url
+            ? `<img class="card-school-photo" src="${data.school_photo_url}" alt="Foto da escola">`
+            : `<div class="card-school-photo empty"></div>`;
 
         document.getElementById("cardSheet").innerHTML = `
-            <div class="card-preview">
+            <div class="card-preview single-card">
                 <div class="card-header">
                     <div class="school-name">${escapeHtml(data.school_name || "ESCOLA MUNICIPAL")}</div>
                     <div class="system-name">SisCares</div>
@@ -172,7 +183,8 @@ async function renderSingleCard() {
                 <div class="card-body">
                     <div class="card-main">
                         <div class="card-student-name">${escapeHtml(data.full_name)}</div>
-                        <div class="card-class">${classDisplay}</div>
+                        <div class="card-class">${classLine}</div>
+                        <div class="card-school-photo-area">${schoolPhotoHtml}</div>
                         <div class="card-line">
                             <div class="card-block">
                                 <div class="label">Matrícula</div>
@@ -220,12 +232,18 @@ function exportPdf() {
         filename: `siscares-${className}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: {
-            scale: 2,
+            scale: 3,
             useCORS: true,
             logging: false,
             backgroundColor: "#ffffff",
             width: 1123,
-            windowWidth: 1123
+            windowWidth: 1123,
+            imageTimeout: 0,
+            onclone: (clonedDoc) => {
+                clonedDoc.querySelectorAll(".card-school-photo").forEach(img => {
+                    img.style.imageRendering = "auto";
+                });
+            }
         },
         jsPDF: {
             unit: "mm",
@@ -249,6 +267,33 @@ function exportPdf() {
         page.classList.remove("sheet-page");
         page.classList.add("print-a4-page");
         page.style.cssText = "";
+        // Substituir imagens por clones absolutamente posicionados para evitar distorção no html2canvas
+        page.querySelectorAll(".card-school-photo").forEach(img => {
+            if (!img.src || img.classList.contains("empty")) return;
+            const rect = img.getBoundingClientRect();
+            const container = img.parentElement;
+            const containerRect = container.getBoundingClientRect();
+            const cloneImg = document.createElement("img");
+            cloneImg.src = img.src;
+            cloneImg.style.position = "absolute";
+            cloneImg.style.left = "0";
+            cloneImg.style.top = "0";
+            cloneImg.style.width = rect.width + "px";
+            cloneImg.style.height = rect.height + "px";
+            cloneImg.style.objectFit = "contain";
+            cloneImg.style.display = "block";
+            cloneImg.style.imageRendering = "auto";
+            const overlay = document.createElement("div");
+            overlay.style.position = "absolute";
+            overlay.style.left = (rect.left - containerRect.left) + "px";
+            overlay.style.top = (rect.top - containerRect.top) + "px";
+            overlay.style.width = rect.width + "px";
+            overlay.style.height = rect.height + "px";
+            overlay.style.overflow = "hidden";
+            overlay.appendChild(cloneImg);
+            container.style.position = "relative";
+            container.appendChild(overlay);
+        });
     });
 
     wrapper.appendChild(clone);

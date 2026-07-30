@@ -8,6 +8,8 @@ CORE_MODULES = [
     ("attendance", "Portaria / Chamada QR Code", "Registro de presença via leitura de QR Code", False),
     ("reports", "Relatórios de Frequência", "Relatórios mensais de frequência por turma", False),
     ("transfers", "Histórico de Transferências", "Transferências internas e externas de alunos", False),
+    ("calendar", "Calendário", "Módulo reservado para funcionalidades futuras de calendário escolar", False),
+    ("logs", "Registros", "Auditoria de transferências e justificativas de faltas", False),
 ]
 
 

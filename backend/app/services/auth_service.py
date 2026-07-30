@@ -7,11 +7,20 @@ from datetime import datetime, timedelta
 from jose import jwt
 
 
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user.hashed_password):
-        return None
-    return user
+def normalize_login(value: str) -> str:
+    return value.strip().lower().split("@", 1)[0]
+
+
+def authenticate_user(db: Session, login: str, password: str) -> Optional[User]:
+    normalized_login = normalize_login(login)
+    users = db.query(User).all()
+    for user in users:
+        stored_login = normalize_login(user.email)
+        if stored_login != normalized_login:
+            continue
+        if verify_password(password, user.hashed_password):
+            return user
+    return None
 
 
 def create_access_token(user_id: int, expires_delta: Optional[timedelta] = None) -> str:
@@ -25,8 +34,9 @@ def create_access_token(user_id: int, expires_delta: Optional[timedelta] = None)
 
 def create_user(db: Session, email: str, password: str, full_name: str, role: str, school_id: Optional[int] = None) -> User:
     hashed = hash_password(password)
+    login_value = normalize_login(email)
     user = User(
-        email=email,
+        email=login_value,
         hashed_password=hashed,
         full_name=full_name,
         role=role,

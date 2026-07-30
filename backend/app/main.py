@@ -6,8 +6,9 @@ from fastapi.responses import RedirectResponse
 
 from app.core.config import settings
 from app.db.base import Base, engine
-from app.routers import auth, schools, classes, students, attendance, modules, reports, transfers
+from app.routers import auth, schools, classes, students, attendance, modules, reports, transfers, calendar, logs, uploads
 from app.db import seed
+from app.services.attendance_scheduler import start_attendance_scheduler
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG)
 
@@ -30,12 +31,17 @@ app.include_router(attendance.router, prefix="/api/v1")
 app.include_router(transfers.router, prefix="/api/v1")
 app.include_router(modules.router, prefix="/api/v1")
 app.include_router(reports.router, prefix="/api/v1")
+app.include_router(calendar.router, prefix="/api/v1")
+app.include_router(logs.router, prefix="/api/v1")
+app.include_router(uploads.router, prefix="/api/v1")
 
 
 @app.on_event("startup")
 def on_startup():
-    Base.metadata.create_all(bind=engine)
+    from app.db.base import ensure_schema
+    ensure_schema()
     seed.seed_modules()
+    start_attendance_scheduler()
 
 
 @app.get("/")

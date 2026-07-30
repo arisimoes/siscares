@@ -1,14 +1,35 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const [students, classes] = await Promise.all([listStudents(), listClasses()]);
 
-    document.getElementById("student_id").innerHTML = students.map(s => `
-        <option value="${s.id}">${s.full_name}</option>
+    const studentSelect = document.getElementById("student_id");
+    const classSelect = document.getElementById("to_class_id");
+
+    const studentMap = Object.fromEntries(students.map(s => [s.id, s]));
+
+    function renderClasses(selectedStudentId) {
+        const currentStudent = studentMap[selectedStudentId];
+        const currentClassId = currentStudent ? currentStudent.class_id : null;
+
+        classSelect.innerHTML = '<option value="">Transferência externa (sem turma)</option>' +
+            classes.map(c => {
+                const isCurrent = c.id === currentClassId;
+                const label = isCurrent ? `${c.name} (${c.grade || "-"}) — Atual` : `${c.name} (${c.grade || "-"})`;
+                return `<option value="${c.id}" ${isCurrent ? "disabled" : ""}>${label}</option>`;
+            }).join("");
+    }
+
+    studentSelect.innerHTML = students.map(s => `
+        <option value="${s.id}">${s.full_name} — ${s.class_name || "Sem turma"}</option>
     `).join("");
 
-    const classSelect = document.getElementById("to_class_id");
-    classSelect.innerHTML += classes.map(c => `
-        <option value="${c.id}">${c.name}</option>
-    `).join("");
+    studentSelect.addEventListener("change", (e) => {
+        renderClasses(parseInt(e.target.value));
+    });
+
+    // initial render for first student
+    if (students.length) {
+        renderClasses(students[0].id);
+    }
 
     document.getElementById("transferForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -21,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             await createTransfer(data);
             alert("Transferência registrada");
-            e.target.reset();
+            window.location.reload();
         } catch (err) {
             alert(err.message);
         }

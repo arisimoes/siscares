@@ -9,9 +9,9 @@ from app.core.crypto import encrypt_value, decrypt_value
 def build_student_qr_payload(student) -> Dict[str, Any]:
     return {
         "sid": student.id,
-        "name": student.full_name,
-        "school": student.school_id,
-        "class": student.class_id,
+        "sch": student.school_id,
+        "cls": student.class_id,
+        "act": student.is_active,
     }
 
 
@@ -25,12 +25,12 @@ def decrypt_qr_payload(token: str) -> Dict[str, Any]:
     return json.loads(decrypted)
 
 
-def generate_qr_code_base64(payload: str, size: int = 16) -> str:
+def generate_qr_code_base64(payload: str, size: int = 4) -> str:
     qr = qrcode.QRCode(
-        version=1,
+        version=None,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
         box_size=size,
-        border=2,
+        border=3,
     )
     qr.add_data(payload)
     qr.make(fit=True)

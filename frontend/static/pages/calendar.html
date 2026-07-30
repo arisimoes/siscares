@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Calendário Escolar</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .calendar-header { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+        .calendar-header select, .calendar-header button { padding: 0.5rem; }
+        .year-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+        .month-card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 0.75rem; }
+        .month-card h4 { margin: 0 0 0.5rem; text-align: center; text-transform: capitalize; }
+        .month-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; text-align: center; }
+        .month-days .weekday { font-weight: bold; font-size: 0.75rem; color: #666; }
+        .month-days .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            background: #f8f9fa;
+        }
+        .month-days .day:hover { background: #e9ecef; }
+        .month-days .day.weekend { background: #f0f0f0; color: #999; }
+        .month-days .day.holiday { background: #ffe0e0; color: #c00; font-weight: bold; }
+        .month-days .day.holiday { background: #ffcc80; color: #7c4a00; font-weight: bold; }
+        .month-days .day.event { background: #fff59d; color: #7a6a00; }
+        .month-days .day.school { background: #d4edda; color: #155724; }
+        .month-days .day.selected { outline: 2px solid #0d6efd; }
+        .legend { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; font-size: 0.85rem; }
+        .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
+        .legend .dot { width: 12px; height: 12px; border-radius: 2px; display: inline-block; border: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <span id="userName"></span>
+            <button onclick="window.location.href='/static/pages/index.html'">Painel</button>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h2>Calendário Escolar</h2>
+
+        <div class="calendar-header">
+            <label>Ano letivo:
+                <select id="yearSelect"></select>
+            </label>
+            <button onclick="addYear()">+ Cadastrar ano letivo</button>
+            <button onclick="editCurrentYear()">Editar ano letivo</button>
+            <button onclick="generateYear()">Gerar calendário base</button>
+            <span id="yearInfo"></span>
+        </div>
+
+        <div class="legend">
+            <span><span class="dot" style="background:#d4edda"></span> Dia de aula</span>
+            <span><span class="dot" style="background:#ffcc80"></span> Feriado</span>
+            <span><span class="dot" style="background:#fff59d"></span> Data comemorativa</span>
+            <span><span class="dot" style="background:#f0f0f0"></span> Fim de semana</span>
+        </div>
+
+        <p style="font-size:0.85rem;color:#666;">Clique sobre um dia para alternar entre: Dia de aula → Feriado → Data comemorativa → Fim de semana.</p>
+
+        <div id="yearGrid" class="year-grid"></div>
+    </main>
+
+    <div id="yearModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="yearModalTitle">Cadastrar ano letivo</h3>
+            <label>Ano: <input type="number" id="newYear" value="2026" readonly></label>
+            <label>Início: <input type="date" id="newYearStart"></label>
+            <label>Término: <input type="date" id="newYearEnd"></label>
+            <div class="modal-actions">
+                <button onclick="saveYear()">Salvar</button>
+                <button type="button" onclick="closeYearModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js?v=14"></script>
+    <script src="/static/js/calendar.js?v=4"></script>
+</body>
+</html>

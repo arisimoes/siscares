@@ -28,7 +28,6 @@
             <select id="role" required onchange="togglePermissionBtn()">
                 <option value="staff">Funcionário / Portaria</option>
                 <option value="secretary">Secretário(a) Escolar</option>
-                <option value="school_admin">Gestor Escolar</option>
             </select>
 
             <label for="password">Senha</label>
@@ -57,6 +56,7 @@
                     <label><input type="checkbox" id="perm_reports"> Relatórios</label>
                     <label><input type="checkbox" id="perm_transfers"> Transferências</label>
                     <label><input type="checkbox" id="perm_users"> Funcionários</label>
+                    <label><input type="checkbox" id="perm_calendar"> Calendário</label>
                 </div>
                 <div class="modal-actions">
                     <button type="button" onclick="savePermissionsFromModal()">OK</button>
@@ -78,7 +78,7 @@
         </table>
     </main>
 
-    <script src="/static/js/api.js?v=4"></script>
-    <script src="/static/js/users.js?v=4"></script>
+    <script src="/static/js/api.js?v=5"></script>
+    <script src="/static/js/users.js?v=2"></script>
 </body>
 </html>

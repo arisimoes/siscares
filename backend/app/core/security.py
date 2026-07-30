@@ -41,6 +41,8 @@ PERMISSION_MODULE_MAP = {
     "reports": "manage_reports",
     "transfers": "manage_transfers",
     "users": "manage_users",
+    "calendar": "manage_calendar",
+    "logs": "manage_logs",
 }
 
 

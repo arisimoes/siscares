@@ -17,21 +17,56 @@
     <main class="dashboard">
         <h2>Alunos</h2>
         <form id="studentForm">
+            <input type="hidden" id="student_id">
             <input type="text" id="full_name" placeholder="Nome completo" required>
             <input type="date" id="birth_date" placeholder="Data de nascimento">
             <input type="text" id="cpf" placeholder="CPF">
             <input type="text" id="registration_code" placeholder="Matrícula">
             <select id="class_id" required></select>
-            <button type="submit">Cadastrar</button>
+            <div class="inline-checkbox">
+                <label for="bolsa_familia">Bolsa Família</label>
+                <input type="checkbox" id="bolsa_familia">
+            </div>
+            <button type="submit" id="submitBtn">Cadastrar</button>
+            <button type="button" id="cancelEdit" class="hidden">Cancelar</button>
         </form>
+
+        <div class="filters">
+            <label>Turma:
+                <select id="filterClass">
+                    <option value="">Todas</option>
+                </select>
+            </label>
+            <label>Nome: <input type="text" id="filterName" placeholder="Nome do aluno"></label>
+            <button onclick="applyFilters()">Filtrar</button>
+        </div>
+
         <table>
             <thead>
-                <tr><th>Nome</th><th>Turma</th><th>Matrícula</th><th>Ações</th></tr>
+                <tr><th>Nome</th><th>Turma</th><th>Matrícula</th><th>Bolsa Família</th><th>Ações</th></tr>
             </thead>
             <tbody id="studentsTable"></tbody>
         </table>
     </main>
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/students.js"></script>
+
+    <div id="justifyModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Justificar falta - <span id="justifyStudentName"></span></h3>
+            <input type="hidden" id="justifyStudentId">
+            <label>Data da falta:
+                <input type="date" id="justifyDate">
+            </label>
+            <label>Justificativa:
+                <textarea id="justifyText" rows="3" placeholder="Descreva o motivo da ausência..."></textarea>
+            </label>
+            <div class="modal-actions">
+                <button onclick="submitJustification()">Salvar</button>
+                <button type="button" onclick="closeJustifyModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js?v=14"></script>
+    <script src="/static/js/students.js?v=14"></script>
 </body>
 </html>

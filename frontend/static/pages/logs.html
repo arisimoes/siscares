@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Registros</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Registros</h2>
+
+        <div class="filters">
+            <label>Tipo:
+                <select id="filterType">
+                    <option value="">Todos</option>
+                    <option value="transferência">Transferências</option>
+                    <option value="justificativa">Justificativas</option>
+                </select>
+            </label>
+            <label>Aluno:
+                <input type="text" id="filterStudent" placeholder="Nome do aluno">
+            </label>
+            <button onclick="applyFilters()">Filtrar</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Tipo</th>
+                    <th>Aluno</th>
+                    <th>Turma Anterior</th>
+                    <th>Turma Posterior</th>
+                    <th>Data da Falta</th>
+                    <th>Motivo</th>
+                    <th>Registrado por</th>
+                </tr>
+            </thead>
+            <tbody id="logsTable">
+                <tr><td colspan="8" class="empty-state">Carregando...</td></tr>
+            </tbody>
+        </table>
+    </main>
+
+    <script src="/static/js/api.js?v=15"></script>
+    <script src="/static/js/logs.js?v=1"></script>
+</body>
+</html>

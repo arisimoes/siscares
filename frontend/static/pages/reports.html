@@ -16,8 +16,17 @@
     </nav>
     <main class="dashboard">
         <h2>Relatório de Frequência</h2>
-        <input type="month" id="month" value="2026-07">
-        <button onclick="loadReport()">Gerar</button>
+        <div class="filters">
+            <label>Mês: <input type="month" id="month" value="2026-07"></label>
+            <label>Turma:
+                <select id="filterClass">
+                    <option value="">Todas</option>
+                </select>
+            </label>
+            <label>Dia: <input type="date" id="filterDay"></label>
+            <label>Aluno: <input type="text" id="filterStudent" placeholder="Nome do aluno"></label>
+            <button onclick="loadReport()">Gerar</button>
+        </div>
 
         <table id="reportTable" style="display:none">
             <thead>
@@ -27,7 +36,7 @@
         </table>
     </main>
 
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/reports.js"></script>
+    <script src="/static/js/api.js?v=7"></script>
+    <script src="/static/js/reports.js?v=7"></script>
 </body>
 </html>

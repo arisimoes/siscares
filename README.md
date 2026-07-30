@@ -155,4 +155,18 @@ siscares/
 ```
 
 ---
+## 🆕 Novidades (changelog rápido)
+
+Essas alterações recentes melhoram a emissão das carteirinhas e adicionam suporte à imagem de marca da escola:
+
+- **Upload de imagem da escola:** agora é possível enviar uma imagem (PNG/JPG/WEBP) pela página de cadastro/edição da escola. A imagem é armazenada em `frontend/static/uploads/` e o caminho é salvo em `schools.photo_url`.
+- **Imagem exibida nas carteirinhas:** se a escola possuir imagem cadastrada, ela será renderizada na área da carteirinha (tanto na geração em lote A4 quanto na carteirinha individual).
+- **Melhorias visuais:** removida a borda tracejada da área de imagem, ampliada a área e ajustada a renderização para reduzir serrilhado e distorção.
+- **Exportação PDF aprimorada:** ajustes no `html2pdf`/`html2canvas` para melhorar resolução (`scale: 3`), tempo de espera de imagens, e sobreposição de imagens para evitar distorção na rasterização.
+- **Carteirinha individual centralizada:** ao gerar/imprimir uma carteirinha individual, ela é centralizada na página durante a impressão.
+- **Turno na carteirinha:** a linha da turma agora mostra também o `Turno` da turma quando cadastrado.
+
+Essas melhorias estão no código e já commitadas no repositório.
+
+---
 

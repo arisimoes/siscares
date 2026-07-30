@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCares - Gestores Escolares</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="brand">SisCares</div>
+        <div class="menu">
+            <a href="/static/pages/index.html" class="btn">Painel</a>
+            <button onclick="logout()">Sair</button>
+        </div>
+    </nav>
+    <main class="dashboard">
+        <h2>Gestores Escolares</h2>
+        <form id="managerForm" class="form-card">
+            <input type="hidden" id="managerId">
+
+            <label for="school_id">Escola</label>
+            <select id="school_id" required>
+                <option value="">Selecione a escola</option>
+            </select>
+
+            <label for="full_name">Nome completo</label>
+            <input type="text" id="full_name" required>
+
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required>
+
+            <label for="password">Senha</label>
+            <input type="password" id="password">
+            <small>Preencha apenas para cadastrar novo gestor ou alterar a senha.</small>
+
+            <div class="form-actions">
+                <button type="submit">Salvar</button>
+                <button type="button" id="cancelBtn" class="btn-secondary" onclick="resetForm()">Cancelar</button>
+            </div>
+        </form>
+
+        <table id="managersTable" class="data-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Escola</th>
+                    <th>Ativo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </main>
+
+    <script src="/static/js/api.js?v=5"></script>
+    <script src="/static/js/managers.js?v=5"></script>
+</body>
+</html>

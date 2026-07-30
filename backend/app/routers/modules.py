@@ -22,9 +22,13 @@ def list_modules(
 def list_school_modules(
     school_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role("super_admin")),
+    current_user: User = Depends(get_current_user),
 ):
-    return db.query(SchoolModuleSetting).filter(SchoolModuleSetting.school_id == school_id).all()
+    if current_user.role == "super_admin" or (
+        current_user.role in {"school_admin", "secretary", "staff"} and current_user.school_id == school_id
+    ):
+        return db.query(SchoolModuleSetting).filter(SchoolModuleSetting.school_id == school_id).all()
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permissão insuficiente")
 
 
 @router.post("/school/{school_id}/{module_id}")

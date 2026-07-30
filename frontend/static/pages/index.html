@@ -20,6 +20,7 @@
 
         <section id="admin-modules" class="hidden">
             <h3>Gestão de Módulos por Escola</h3>
+            <p class="module-hint">Marque ou desmarque os módulos opcionais que cada escola poderá utilizar. Módulos principais ficam sempre ativos.</p>
             <div id="moduleSchoolList"></div>
         </section>
 
@@ -27,18 +28,21 @@
             <h3>Cadastros Rápidos</h3>
             <div class="cards">
                 <a id="nav-schools" href="/static/pages/schools.html" class="card">Escolas</a>
-                <a href="/static/pages/users.html" class="card">Funcionários</a>
-                <a href="/static/pages/classes.html" class="card">Turmas e Turnos</a>
-                <a href="/static/pages/students.html" class="card">Alunos</a>
-                <a href="/static/pages/card.html" class="card">Carteirinhas</a>
-                <a href="/static/pages/attendance.html" class="card">Chamada QR</a>
-                <a href="/static/pages/reports.html" class="card">Relatórios</a>
-                <a href="/static/pages/transfers.html" class="card">Transferências</a>
+                <a id="nav-managers" href="/static/pages/managers.html" class="card">Gestores</a>
+                <a href="/static/pages/users.html" id="nav-users" class="card">Funcionários</a>
+                <a href="/static/pages/classes.html" id="nav-classes" class="card">Turmas e Turnos</a>
+                <a href="/static/pages/students.html" id="nav-students" class="card">Alunos</a>
+                <a href="/static/pages/card.html" id="nav-card" class="card">Carteirinhas</a>
+                <a href="/static/pages/attendance.html" id="nav-attendance" class="card">Chamada QR</a>
+                <a href="/static/pages/reports.html" id="nav-reports" class="card">Relatórios</a>
+                <a href="/static/pages/transfers.html" id="nav-transfers" class="card">Transferências</a>
+                <a id="nav-calendar" href="/static/pages/calendar.html" class="card hidden">Calendário</a>
+                <a id="nav-logs" href="/static/pages/logs.html" class="card hidden">Registros</a>
             </div>
         </section>
     </main>
 
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/dashboard.js"></script>
+    <script src="/static/js/api.js?v=16"></script>
+    <script src="/static/js/dashboard.js?v=7"></script>
 </body>
 </html>
