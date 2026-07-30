@@ -9,6 +9,7 @@ let currentPermissions = {
     manage_transfers: false,
     manage_users: false,
     manage_calendar: false,
+    manage_logs: false,
 };
 
 const PERM_FIELDS = [
@@ -20,6 +21,7 @@ const PERM_FIELDS = [
     { key: "manage_transfers", id: "perm_transfers" },
     { key: "manage_users", id: "perm_users" },
     { key: "manage_calendar", id: "perm_calendar" },
+    { key: "manage_logs", id: "perm_logs" },
 ];
 
 async function init() {
@@ -169,6 +171,7 @@ function resetCurrentPermissions() {
         manage_transfers: false,
         manage_users: false,
         manage_calendar: false,
+        manage_logs: false,
     };
 }
 
