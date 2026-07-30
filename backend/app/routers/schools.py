@@ -1,10 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from pathlib import Path
 
 from app.db.session import get_db
 from app.core.security import get_current_user, require_role
-from app.models import User, School
+from app.core.config import settings
+from app.models import (
+    User, School, UserPermission, Student, Class, Shift, Attendance,
+    TransferHistory, SchoolModuleSetting, SchoolCalendarDay, SchoolAcademicYear
+)
 from app.schemas import SchoolCreate, SchoolResponse, SchoolUpdate
 
 router = APIRouter(prefix="/schools", tags=["schools"])
@@ -59,3 +64,48 @@ def update_school(
     db.commit()
     db.refresh(school)
     return school
+
+
+@router.delete("/{school_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_school(
+    school_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("super_admin")),
+):
+    school = db.query(School).filter(School.id == school_id).first()
+    if not school:
+        raise HTTPException(status_code=404, detail="Escola não encontrada")
+
+    # Remove foto do disco, se existir
+    if school.photo_url:
+        photo_path = Path(settings.UPLOAD_DIR) / school.photo_url.replace("/static/uploads/", "")
+        try:
+            if photo_path.exists():
+                photo_path.unlink()
+        except Exception:
+            pass
+
+    # Exclui todos os dados relacionados à escola em cascata
+    db.query(Attendance).filter(Attendance.student_id.in_(
+        db.query(Student.id).filter(Student.school_id == school_id)
+    )).delete(synchronize_session=False)
+
+    db.query(TransferHistory).filter(TransferHistory.student_id.in_(
+        db.query(Student.id).filter(Student.school_id == school_id)
+    )).delete(synchronize_session=False)
+
+    db.query(UserPermission).filter(UserPermission.user_id.in_(
+        db.query(User.id).filter(User.school_id == school_id)
+    )).delete(synchronize_session=False)
+
+    db.query(User).filter(User.school_id == school_id).delete(synchronize_session=False)
+    db.query(Student).filter(Student.school_id == school_id).delete(synchronize_session=False)
+    db.query(Class).filter(Class.school_id == school_id).delete(synchronize_session=False)
+    db.query(Shift).filter(Shift.school_id == school_id).delete(synchronize_session=False)
+    db.query(SchoolModuleSetting).filter(SchoolModuleSetting.school_id == school_id).delete(synchronize_session=False)
+    db.query(SchoolCalendarDay).filter(SchoolCalendarDay.school_id == school_id).delete(synchronize_session=False)
+    db.query(SchoolAcademicYear).filter(SchoolAcademicYear.school_id == school_id).delete(synchronize_session=False)
+
+    db.delete(school)
+    db.commit()
+    return None

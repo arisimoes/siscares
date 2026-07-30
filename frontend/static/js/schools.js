@@ -93,6 +93,7 @@ async function loadSchools() {
             <td class="actions">
                 <button class="btn-secondary" onclick="editSchool(${s.id}, '${escapeHtml(s.name)}', '${escapeHtml(s.cnpj || "")}', '${escapeHtml(s.phone || "")}', '${escapeHtml(s.city || "")}', '${escapeHtml(s.state || "")}', ${s.is_active}, '${s.photo_url || ""}')">Editar</button>
                 <button class="btn" onclick="openModules(${s.id})">Módulos</button>
+                <button class="btn-danger" onclick="deleteSchoolById(${s.id})">Excluir</button>
             </td>
         </tr>
     `).join("");
@@ -157,6 +158,16 @@ window.toggleModuleForSchool = async function(schoolId, moduleId, isEnabled) {
     } catch (err) {
         alert(err.message);
         await openModules(schoolId);
+    }
+};
+
+window.deleteSchoolById = async function(id) {
+    if (!confirm("ATENÇÃO: Todos os dados desta escola serão removidos permanentemente (usuários, alunos, turmas, frequências, transferências e calendário). Deseja continuar?")) return;
+    try {
+        await deleteSchool(id);
+        await loadSchools();
+    } catch (err) {
+        alert(err.message);
     }
 };
 

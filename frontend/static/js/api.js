@@ -51,6 +51,7 @@ function logout() {
 async function listSchools() { return api("/schools"); }
 async function createSchool(data) { return api("/schools", { method: "POST", body: JSON.stringify(data) }); }
 async function updateSchool(id, data) { return api(`/schools/${id}`, { method: "PUT", body: JSON.stringify(data) }); }
+async function deleteSchool(id) { return api(`/schools/${id}`, { method: "DELETE" }); }
 
 async function listClasses() { return api("/classes"); }
 async function createClass(data) { return api("/classes", { method: "POST", body: JSON.stringify(data) }); }
