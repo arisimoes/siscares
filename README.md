@@ -70,7 +70,48 @@ Módulos disponíveis:
 
 ---
 
-## ⚙️ Como Rodar o Projeto no Servidor Interno
+## ⚙️ Instalação em Produção (Recomendada)
+
+Para implantar o SisCarEs em um servidor Debian/Ubuntu de forma automatizada, use o script `install.sh` no diretório raiz do projeto.
+
+### Pré-requisitos do instalador
+* Sistema Debian/Ubuntu (com `apt-get`)
+* Acesso root ou sudo
+* Projeto já clonado no servidor
+
+### Passo a passo
+
+1. **Acesse o diretório do projeto:**
+   ```bash
+   cd siscares
+   ```
+
+2. **Execute o instalador como root:**
+   ```bash
+   sudo bash install.sh
+   ```
+
+3. **Siga as perguntas interativas:**
+   * Banco de dados será **local** ou **remoto**
+   * Deseja gerar certificado SSL **autoassinado** ou usar um **próprio**
+   * Login, nome e senha do super-admin
+
+4. **Ao final da instalação, anote as informações exibidas:**
+   * URL de acesso (`https://<IP_DO_SERVIDOR>:8443`)
+   * Login e senha do super-admin
+   * Senha gerada automaticamente para o usuário do banco PostgreSQL
+
+O instalador cria automaticamente:
+* Usuário e banco PostgreSQL
+* Ambiente virtual Python com as dependências
+* Arquivo `.env` com chaves seguras
+* Certificado SSL (se solicitado)
+* Serviço systemd `siscares` iniciado e habilitado
+* Super-administrador com os dados informados
+
+---
+
+## 🛠️ Como Rodar Manualmente (Desenvolvimento)
 
 ### Pré-requisitos
 * Git
@@ -109,18 +150,24 @@ Módulos disponíveis:
    # edite SECRET_KEY e CRYPTO_KEY com valores seguros
    ```
 
-6. **Inicie o servidor (HTTPS local na porta 8443):**
+6. **Execute as migrações:**
+   ```bash
+   alembic upgrade head
+   ```
+
+7. **Inicie o servidor (HTTPS local na porta 8443):**
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8443 --ssl-keyfile certs/key.pem --ssl-certfile certs/cert.pem --reload
    ```
    > A câmera para leitura de QR Code exige contexto seguro (HTTPS ou localhost), por isso o SisCarEs roda com certificado SSL próprio na porta 8443.
 
-7. **Crie o super-admin:**
+8. **Crie o super-admin:**
    ```bash
    python scripts/create_superadmin.py --email admin --password admin123 --name "Administrador"
    ```
 
-8. **Acesse o sistema:**
+9. **Acesse o sistema:**
+   * Login: https://localhost:8443/static/pages/login.html
    * Painel: https://localhost:8443/static/pages/index.html
    * API docs: https://localhost:8443/docs
 
