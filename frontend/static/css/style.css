@@ -38,9 +38,11 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.login-logo {
-    font-size: 3.5rem;
+.login-logo-img {
+    width: 120px;
+    height: 80px;
     margin-bottom: 0.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .login-brand h1 {

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 90" fill="none">
+  <!-- Pessoa de trás (laranja) -->
+  <circle cx="70" cy="26" r="16" fill="#f97316"/>
+  <path d="M42 80c0-20 12.5-34 28-34s28 14 28 34v6H42v-6z" fill="#f97316"/>
+  <!-- Pessoa da frente (azul) -->
+  <circle cx="50" cy="34" r="18" fill="#2563eb"/>
+  <path d="M18 86c0-22 14-38 32-38s32 16 32 38v4H18v-4z" fill="#2563eb"/>
+</svg>
