@@ -9,7 +9,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    APP_NAME: str = "SisCares"
+    APP_NAME: str = "SisCarEs"
     DEBUG: bool = False
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"

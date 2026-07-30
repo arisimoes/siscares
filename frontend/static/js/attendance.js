@@ -67,7 +67,7 @@ async function onScanSuccess(decodedText) {
     console.log("QR fernet?", looksLikeFernet(payload));
 
     if (!looksLikeFernet(payload)) {
-        console.warn("QR lido não parece um token SisCares; ignorando.");
+        console.warn("QR lido não parece um token SisCarEs; ignorando.");
         return;
     }
 

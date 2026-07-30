@@ -1,6 +1,6 @@
-# 🆔 SisCares - Sistema de Carteirinha Escolar & Controle de Frequência
+# 🆔 SisCarEs - Sistema de Carteirinha Escolar & Controle de Frequência
 
-O **SisCares** é uma solução completa para gestão escolar desenvolvida para automatizar a emissão de carteirinhas estudantis e simplificar a chamada e controle de frequência dos alunos por meio de leitura de QR Code criptografado.
+O **SisCarEs** é uma solução completa para gestão escolar desenvolvida para automatizar a emissão de carteirinhas estudantis e simplificar a chamada e controle de frequência dos alunos por meio de leitura de QR Code criptografado.
 
 > **Do Caos das Planilhas à Automação Completa:** O sistema substitui o controle manual feito em planilhas por um banco de dados estruturado, reduzindo erros, automatizando relatórios de frequência (ex: controle do Bolsa Família) e registrando o histórico escolar do aluno.
 
@@ -14,7 +14,7 @@ Anteriormente, o controle de presenças e porcentagem de frequência exigia pree
 | :---: | :---: |
 | *Controle manual dia a dia (Presença / Falta)* | *Cálculo manual do percentual por mês/aluno* |
 
-O **SisCares** automatiza todo esse fluxo desde a portaria até a secretaria.
+O **SisCarEs** automatiza todo esse fluxo desde a portaria até a secretaria.
 
 ---
 
@@ -113,7 +113,7 @@ Módulos disponíveis:
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8443 --ssl-keyfile certs/key.pem --ssl-certfile certs/cert.pem --reload
    ```
-   > A câmera para leitura de QR Code exige contexto seguro (HTTPS ou localhost), por isso o SisCares roda com certificado SSL próprio na porta 8443.
+   > A câmera para leitura de QR Code exige contexto seguro (HTTPS ou localhost), por isso o SisCarEs roda com certificado SSL próprio na porta 8443.
 
 7. **Crie o super-admin:**
    ```bash

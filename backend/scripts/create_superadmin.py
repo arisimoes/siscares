@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script utilitário para criar o super-admin do SisCares.
+Script utilitário para criar o super-admin do SisCarEs.
 Usage:
     python scripts/create_superadmin.py --email admin@siscares.local --password admin123 --name "Administrador"
 """
@@ -15,7 +15,7 @@ from app.services.auth_service import create_user
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Cria super-admin do SisCares")
+    parser = argparse.ArgumentParser(description="Cria super-admin do SisCarEs")
     parser.add_argument("--email", required=True)
     parser.add_argument("--password", required=True)
     parser.add_argument("--name", default="Super Admin")

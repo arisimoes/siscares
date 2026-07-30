@@ -51,7 +51,7 @@ async function loadSheet() {
                 \u003cdiv class="card-preview card-inactive"\u003e
                     \u003cdiv class="card-header"\u003e
                         \u003cdiv class="school-name"\u003e${escapeHtml(s.school_name || "ESCOLA MUNICIPAL")}\u003c/div\u003e
-                        \u003cdiv class="system-name"\u003eSisCares\u003c/div\u003e
+                        \u003cdiv class="system-name"\u003eSisCarEs\u003c/div\u003e
                     \u003c/div\u003e
                     \u003cdiv class="card-body"\u003e
                         \u003cdiv class="card-main"\u003e
@@ -85,7 +85,7 @@ async function loadSheet() {
                 <div class="card-preview">
                     <div class="card-header">
                         <div class="school-name">${escapeHtml(s.school_name || "ESCOLA MUNICIPAL")}</div>
-                        <div class="system-name">SisCares</div>
+                        <div class="system-name">SisCarEs</div>
                     </div>
                     <div class="card-body">
                         <div class="card-main">
@@ -194,7 +194,7 @@ async function renderSingleCard() {
             <div class="card-preview single-card">
                 <div class="card-header">
                     <div class="school-name">${escapeHtml(data.school_name || "ESCOLA MUNICIPAL")}</div>
-                    <div class="system-name">SisCares</div>
+                    <div class="system-name">SisCarEs</div>
                 </div>
                 <div class="card-body">
                     <div class="card-main">
@@ -218,7 +218,7 @@ async function renderSingleCard() {
                     </div>
                 </div>
                 <div class="card-footer">
-                    Carteirinha escolar válida com assinatura digital SisCares
+                    Carteirinha escolar válida com assinatura digital SisCarEs
                 </div>
             </div>
         `;

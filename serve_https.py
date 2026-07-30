@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Servidor HTTPS simples para o SisCares.
+"""Servidor HTTPS simples para o SisCarEs.
 
 - Serve arquivos estáticos do frontend em /
 - Encaminha /api/v1/*, /static/* e /docs* para o backend uvicorn na porta 8000
@@ -19,7 +19,7 @@ KEY_FILE = "/root/siscares/backend/certs/key.pem"
 FRONTEND_DIR = Path("/root/siscares/frontend")
 
 
-class SisCaresHandler(http.server.SimpleHTTPRequestHandler):
+class SisCarEsHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(FRONTEND_DIR), **kwargs)
 
@@ -74,9 +74,9 @@ class SisCaresHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     server_address = ("0.0.0.0", HTTPS_PORT)
-    httpd = http.server.HTTPServer(server_address, SisCaresHandler)
+    httpd = http.server.HTTPServer(server_address, SisCarEsHandler)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile=CERT_FILE, keyfile=KEY_FILE)
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-    print(f"Servindo SisCares em https://0.0.0.0:{HTTPS_PORT}")
+    print(f"Servindo SisCarEs em https://0.0.0.0:{HTTPS_PORT}")
     httpd.serve_forever()
