@@ -4,10 +4,24 @@ from typing import List
 
 from app.db.session import get_db
 from app.core.security import get_current_user, require_role
-from app.models import User, School, Class, Shift, Student
+from app.models import User, School, Class, Shift, Student, SchoolAcademicYear
 from app.schemas import ClassCreate, ClassResponse, ClassUpdate, ShiftCreate, ShiftResponse
 from app.core.module_guard import require_module_for_current_school
 from app.services.attendance_scheduler import close_shift_attendance
+
+
+def _require_academic_year(db: Session, school_id: int, year: int):
+    if not year:
+        return
+    exists = db.query(SchoolAcademicYear).filter(
+        SchoolAcademicYear.school_id == school_id,
+        SchoolAcademicYear.year == year,
+    ).first()
+    if not exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ano letivo {year} não cadastrado. Cadastre-o no calendário escolar primeiro.",
+        )
 
 router = APIRouter(prefix="/classes", tags=["classes"])
 
@@ -57,6 +71,7 @@ def create_class(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role("school_admin", "secretary", "staff", module="classes")),
 ):
+    _require_academic_year(db, current_user.school_id, payload.year)
     cls = Class(school_id=current_user.school_id, **payload.model_dump())
     db.add(cls)
     db.commit()
@@ -75,7 +90,10 @@ def update_class(
     cls = db.query(Class).filter(Class.id == class_id, Class.school_id == current_user.school_id).first()
     if not cls:
         raise HTTPException(status_code=404, detail="Turma não encontrada")
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    if "year" in data:
+        _require_academic_year(db, current_user.school_id, data["year"])
+    for field, value in data.items():
         setattr(cls, field, value)
     db.commit()
     db.refresh(cls)

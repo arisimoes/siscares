@@ -25,7 +25,7 @@ const PERM_FIELDS = [
 async function init() {
     currentUser = await getMe();
     if (!currentUser || !["school_admin", "secretary"].includes(currentUser.role)) {
-        alert("Acesso restrito. Apenas gestores e secretários podem gerenciar funcionários.");
+        alert("Acesso restrito. Apenas diretores e secretarias podem gerenciar administrativo.");
         window.location.href = "/static/pages/index.html";
         return;
     }
@@ -67,7 +67,12 @@ function renderUsers() {
 }
 
 function roleLabel(role) {
-    const labels = { staff: "Funcionário / Portaria", secretary: "Secretário(a) Escolar" };
+    const labels = {
+        staff: "Administrativo",
+        secretary: "Secretaria",
+        school_admin: "Diretor",
+        super_admin: "Super Admin",
+    };
     return labels[role] || role;
 }
 
@@ -138,7 +143,7 @@ window.editUser = function(id) {
 };
 
 window.toggleUserActive = async function(id, isActive) {
-    if (!confirm(isActive ? "Ativar funcionário?" : "Desativar funcionário?")) return;
+    if (!confirm(isActive ? "Ativar usuário?" : "Desativar usuário?")) return;
     try {
         await updateUser(id, { is_active: isActive });
         await loadUsers();

@@ -42,6 +42,8 @@ def register_attendance(
         raise HTTPException(status_code=404, detail="Aluno não pertence à escola")
     if not student.is_active:
         raise HTTPException(status_code=403, detail="Aluno inativo — matrícula cancelada")
+    if student.is_transferred_externally:
+        raise HTTPException(status_code=403, detail="Carteirinha inválida — aluno transferido externamente")
 
     shift = db.query(Shift).filter(Shift.id == payload.shift_id, Shift.school_id == current_user.school_id).first()
     if not shift:

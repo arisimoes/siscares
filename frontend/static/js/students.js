@@ -1,7 +1,12 @@
+let allClasses = [];
+
 document.addEventListener("DOMContentLoaded", async () => {
     await loadClasses();
+    await loadAcademicYears();
     await loadFilterClasses();
     await loadStudents();
+
+    document.getElementById("showTransferred")?.addEventListener("change", applyFilters);
 
     document.getElementById("studentForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -31,36 +36,66 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadClasses() {
-    const classes = await listClasses();
+    allClasses = await listClasses();
     const select = document.getElementById("class_id");
-    select.innerHTML = classes.map(c => `<option value="${c.id}">${c.name} (${c.grade})</option>`).join("");
+    select.innerHTML = allClasses.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"}) - ${c.year}</option>`).join("");
+}
+
+async function loadAcademicYears() {
+    try {
+        const me = await getMe();
+        if (!me || !me.school_id) return;
+        const years = await listAcademicYears(me.school_id);
+        const select = document.getElementById("filterYear");
+        const current = select.value;
+        select.innerHTML = '<option value="">Todos</option>' +
+            years.map(y => `<option value="${y.year}">${y.year}</option>`).join("");
+        select.value = current || "";
+        select.addEventListener("change", () => {
+            loadFilterClasses();
+            applyFilters();
+        });
+    } catch (err) {
+        console.error("Erro ao carregar anos letivos:", err);
+    }
 }
 
 async function loadFilterClasses() {
-    const classes = await listClasses();
+    const yearFilter = document.getElementById("filterYear")?.value || "";
+    const classes = yearFilter
+        ? allClasses.filter(c => String(c.year) === yearFilter)
+        : allClasses;
     const select = document.getElementById("filterClass");
     select.innerHTML = '<option value="">Todas</option>' +
-        classes.map(c => `<option value="${c.id}">${c.name} (${c.grade})</option>`).join("");
+        classes.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"}) - ${c.year}</option>`).join("");
 }
 
 async function loadStudents() {
     const classFilter = document.getElementById("filterClass").value;
     const nameFilter = document.getElementById("filterName").value.trim();
+    const yearFilter = document.getElementById("filterYear")?.value || "";
+    const showTransferred = document.getElementById("showTransferred")?.checked || false;
     const filters = {};
     if (classFilter) filters.class_id = classFilter;
     if (nameFilter) filters.name = nameFilter;
-    const students = await listStudents(filters);
+    let students = await listStudents(filters);
+    if (yearFilter) {
+        const allowedClassIds = new Set(allClasses.filter(c => String(c.year) === yearFilter).map(c => c.id));
+        students = students.filter(s => allowedClassIds.has(s.class_id));
+    }
+    if (!showTransferred) {
+        students = students.filter(s => !s.is_transferred_externally);
+    }
     students.sort((a, b) => a.full_name.localeCompare(b.full_name, "pt-BR", { sensitivity: "base" }));
     const tbody = document.getElementById("studentsTable");
     tbody.innerHTML = students.map(s => `
-        <tr>
-            <td>${s.full_name}</td>
+        <tr class="${s.is_transferred_externally ? 'student-transferred' : ''}">
+            <td>${s.full_name} ${s.is_transferred_externally ? '<span class="badge-transferred">Transferido Externamente</span>' : ''}</td>
             <td>${s.class_name || (s.class_id || "-")}</td>
             <td>${s.registration_code || "-"}</td>
             <td>${s.bolsa_familia ? "Sim" : "Não"}</td>
             <td class="actions">
-                <button class="btn-justify" onclick="openJustifyModal(${s.id}, '${escapeHtml(s.full_name)}')">Justificar</button>
-                <a class="btn" href="/static/pages/card.html?student_id=${s.id}">Carteirinha</a>
+                ${s.is_transferred_externally ? '' : `<button class="btn-justify" onclick="openJustifyModal(${s.id}, '${escapeHtml(s.full_name)}')">Justificar</button><a class="btn" href="/static/pages/card.html?student_id=${s.id}">Carteirinha</a>`}
                 <button class="btn-secondary" onclick="editStudent(${s.id}, '${escapeHtml(s.full_name)}', '${escapeHtml(s.birth_date || "")}', '${escapeHtml(s.cpf || "")}', '${escapeHtml(s.registration_code || "")}', ${s.class_id || 'null'}, ${s.bolsa_familia})">Editar</button>
                 <button class="btn-danger" onclick="deleteStudentItem(${s.id})">Excluir</button>
             </td>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SisCares - Painel</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=3">
 </head>
 <body>
     <nav class="navbar">
@@ -26,23 +26,23 @@
 
         <section>
             <h3>Cadastros Rápidos</h3>
-            <div class="cards">
-                <a id="nav-schools" href="/static/pages/schools.html" class="card">Escolas</a>
-                <a id="nav-managers" href="/static/pages/managers.html" class="card">Gestores</a>
-                <a href="/static/pages/users.html" id="nav-users" class="card">Funcionários</a>
-                <a href="/static/pages/classes.html" id="nav-classes" class="card">Turmas e Turnos</a>
-                <a href="/static/pages/students.html" id="nav-students" class="card">Alunos</a>
-                <a href="/static/pages/card.html" id="nav-card" class="card">Carteirinhas</a>
-                <a href="/static/pages/attendance.html" id="nav-attendance" class="card">Chamada QR</a>
-                <a href="/static/pages/reports.html" id="nav-reports" class="card">Relatórios</a>
-                <a href="/static/pages/transfers.html" id="nav-transfers" class="card">Transferências</a>
-                <a id="nav-calendar" href="/static/pages/calendar.html" class="card hidden">Calendário</a>
-                <a id="nav-logs" href="/static/pages/logs.html" class="card hidden">Registros</a>
+            <div class="cards dashboard-cards">
+                <a id="nav-schools" href="/static/pages/schools.html" class="card dashboard-card"><span class="card-icon">🏫</span><span class="card-label">Escolas</span></a>
+                <a id="nav-managers" href="/static/pages/managers.html" class="card dashboard-card"><span class="card-icon">👔</span><span class="card-label">Diretores</span></a>
+                <a href="/static/pages/users.html" id="nav-users" class="card dashboard-card"><span class="card-icon">👥</span><span class="card-label">Administrativo</span></a>
+                <a href="/static/pages/classes.html" id="nav-classes" class="card dashboard-card"><span class="card-icon">🎓</span><span class="card-label">Turmas e Turnos</span></a>
+                <a href="/static/pages/students.html" id="nav-students" class="card dashboard-card"><span class="card-icon">🧑‍🎓</span><span class="card-label">Alunos</span></a>
+                <a href="/static/pages/card.html" id="nav-card" class="card dashboard-card"><span class="card-icon">🪪</span><span class="card-label">Carteirinhas</span></a>
+                <a href="/static/pages/attendance.html" id="nav-attendance" class="card dashboard-card"><span class="card-icon">📷</span><span class="card-label">Chamada QR</span></a>
+                <a href="/static/pages/reports.html" id="nav-reports" class="card dashboard-card"><span class="card-icon">📊</span><span class="card-label">Relatórios</span></a>
+                <a href="/static/pages/transfers.html" id="nav-transfers" class="card dashboard-card"><span class="card-icon">🔄</span><span class="card-label">Transferências</span></a>
+                <a id="nav-calendar" href="/static/pages/calendar.html" class="card dashboard-card hidden"><span class="card-icon">📅</span><span class="card-label">Calendário</span></a>
+                <a id="nav-logs" href="/static/pages/logs.html" class="card dashboard-card hidden"><span class="card-icon">📋</span><span class="card-label">Registros</span></a>
             </div>
         </section>
     </main>
 
-    <script src="/static/js/api.js?v=16"></script>
-    <script src="/static/js/dashboard.js?v=7"></script>
+    <script src="/static/js/api.js?v=17"></script>
+    <script src="/static/js/dashboard.js?v=8"></script>
 </body>
 </html>

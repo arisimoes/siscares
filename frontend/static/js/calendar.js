@@ -14,7 +14,13 @@ const WEEKDAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 async function init() {
     currentUser = await getMe();
     if (!currentUser) return;
-    document.getElementById("userName").textContent = `${currentUser.full_name} (${currentUser.role})`;
+    const roleLabels = {
+        school_admin: "Diretor",
+        secretary: "Secretaria",
+        staff: "Administrativo",
+        super_admin: "Super Admin",
+    };
+    document.getElementById("userName").textContent = `${currentUser.full_name} (${roleLabels[currentUser.role] || currentUser.role})`;
     schoolId = currentUser.school_id;
     if (!schoolId) {
         alert("Usuário sem escola associada.");

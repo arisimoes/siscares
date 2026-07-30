@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SisCares - Relatórios</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
 </head>
 <body>
     <nav class="navbar">
@@ -16,7 +16,12 @@
     </nav>
     <main class="dashboard">
         <h2>Relatório de Frequência</h2>
-        <div class="filters">
+        <div class="filters no-print">
+            <label>Ano letivo:
+                <select id="filterYear">
+                    <option value="">Todos</option>
+                </select>
+            </label>
             <label>Mês: <input type="month" id="month" value="2026-07"></label>
             <label>Turma:
                 <select id="filterClass">
@@ -25,7 +30,20 @@
             </label>
             <label>Dia: <input type="date" id="filterDay"></label>
             <label>Aluno: <input type="text" id="filterStudent" placeholder="Nome do aluno"></label>
+            <label>Bolsa Família:
+                <select id="filterBolsa">
+                    <option value="">Nenhum</option>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </label>
             <button onclick="loadReport()">Gerar</button>
+            <button class="btn-secondary" onclick="window.print()">Imprimir</button>
+        </div>
+
+        <div id="printHeader" class="print-only">
+            <h2>Relatório de Frequência</h2>
+            <p id="printFilters"></p>
         </div>
 
         <table id="reportTable" style="display:none">
@@ -36,7 +54,7 @@
         </table>
     </main>
 
-    <script src="/static/js/api.js?v=7"></script>
-    <script src="/static/js/reports.js?v=7"></script>
+    <script src="/static/js/api.js?v=11"></script>
+    <script src="/static/js/reports.js?v=11"></script>
 </body>
 </html>

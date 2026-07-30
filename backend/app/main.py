@@ -38,8 +38,9 @@ app.include_router(uploads.router, prefix="/api/v1")
 
 @app.on_event("startup")
 def on_startup():
-    from app.db.base import ensure_schema
+    from app.db.base import ensure_schema, ensure_column_exists
     ensure_schema()
+    ensure_column_exists("students", "is_transferred_externally", "BOOLEAN DEFAULT FALSE")
     seed.seed_modules()
     start_attendance_scheduler()
 

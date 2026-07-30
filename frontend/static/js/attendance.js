@@ -95,7 +95,7 @@ async function onScanSuccess(decodedText) {
             status.textContent = msg;
             status.className = "warning";
             showOverlay("⚠ " + msg, "warning");
-        } else if (isInactive) {
+        } else if (isInactive || msg.toLowerCase().includes("transferido")) {
             status.textContent = msg;
             status.className = "error";
             showOverlay("✕ " + msg, "error");

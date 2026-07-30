@@ -46,7 +46,23 @@ async function loadSheet() {
             return;
         }
 
-        const cardsHtml = await Promise.all(students.map(async (s) => {
+        const cardsHtml = await Promise.all(students.map(async (s) => {            if (s.is_transferred_externally) {
+                return `
+                \u003cdiv class="card-preview card-inactive"\u003e
+                    \u003cdiv class="card-header"\u003e
+                        \u003cdiv class="school-name"\u003e${escapeHtml(s.school_name || "ESCOLA MUNICIPAL")}\u003c/div\u003e
+                        \u003cdiv class="system-name"\u003eSisCares\u003c/div\u003e
+                    \u003c/div\u003e
+                    \u003cdiv class="card-body"\u003e
+                        \u003cdiv class="card-main"\u003e
+                            \u003cdiv class="card-student-name"\u003e${escapeHtml(s.full_name)}\u003c/div\u003e
+                            \u003cdiv class="card-class" style="color:#dc2626;font-weight:600;"\u003eTRANSFERIDO EXTERNAMENTE\u003c/div\u003e
+                            \u003cdiv class="card-inactive-msg"\u003eCarteirinha cancelada\u003c/div\u003e
+                        \u003c/div\u003e
+                    \u003c/div\u003e
+                    \u003cdiv class="card-footer"\u003eCarteirinha sem validade\u003c/div\u003e
+                \u003c/div\u003e`;
+            }
             let cardData = null;
             let qrHtml = "";
             let validity = "31/12/" + (new Date().getFullYear() + 1);

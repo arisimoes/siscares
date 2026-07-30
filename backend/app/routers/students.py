@@ -21,7 +21,11 @@ def list_students(
     current_user: User = Depends(get_current_user),
 ):
     results = []
-    query = db.query(Student).filter(Student.school_id == current_user.school_id, Student.is_active == True)
+    query = db.query(Student).filter(
+        Student.school_id == current_user.school_id,
+        Student.is_active == True,
+        Student.is_transferred_externally == False,
+    )
     if class_id:
         query = query.filter(Student.class_id == class_id)
     if name:
@@ -112,6 +116,8 @@ def student_qr_text(
     student = db.query(Student).filter(Student.id == student_id, Student.school_id == current_user.school_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    if student.is_transferred_externally:
+        raise HTTPException(status_code=403, detail="Carteirinha indisponível — aluno transferido externamente")
     if not student.encrypted_qr_payload:
         student.encrypted_qr_payload = generate_encrypted_qr_payload(student)
         db.commit()
@@ -127,6 +133,8 @@ def student_card(
     student = db.query(Student).filter(Student.id == student_id, Student.school_id == current_user.school_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    if student.is_transferred_externally:
+        raise HTTPException(status_code=403, detail="Carteirinha indisponível — aluno transferido externamente")
     if not student.encrypted_qr_payload:
         student.encrypted_qr_payload = generate_encrypted_qr_payload(student)
         db.commit()

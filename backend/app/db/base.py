@@ -14,6 +14,16 @@ def ensure_schema():
     Base.metadata.create_all(bind=engine)
 
 
+def ensure_column_exists(table_name: str, column_name: str, column_type):
+    """Adiciona uma coluna se ela ainda não existir no banco (fallback sem alembic)."""
+    from sqlalchemy import inspect, text
+    insp = inspect(engine)
+    if table_name in insp.get_table_names() and column_name not in [c["name"] for c in insp.get_columns(table_name)]:
+        with engine.connect() as conn:
+            conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}"))
+            conn.commit()
+
+
 def get_db():
     db = SessionLocal()
     try:

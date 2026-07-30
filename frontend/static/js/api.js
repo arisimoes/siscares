@@ -79,6 +79,7 @@ async function getFrequencyReport(month, filters = {}) {
     if (filters.class_id) params.set("class_id", filters.class_id);
     if (filters.day) params.set("day", filters.day);
     if (filters.student_name) params.set("student_name", filters.student_name);
+    if (filters.bolsa_familia !== undefined && filters.bolsa_familia !== "") params.set("bolsa_familia", filters.bolsa_familia);
     return api(`/reports/frequency?${params.toString()}`);
 }
 

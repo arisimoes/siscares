@@ -23,18 +23,24 @@ O **SisCares** automatiza todo esse fluxo desde a portaria até a secretaria.
 ### 🎴 1. Gestão de Carteirinhas & Emissão em Lote
 * **Geração Automática:** Criação de carteirinhas em lote contendo: nome da escola, nome do aluno, ano/série escolar, turma e turno.
 * **QR Code Criptografado:** Cada carteirinha possui um QR Code único e seguro com os dados do aluno para evitar falsificações.
+* **Imagem da Escola:** Upload do logotipo/marca da escola para impressão nas carteirinhas.
 
 ### 📲 2. Portaria & Chamada via QR Code
-* **Validação por Câmera:** Funcionários cadastrados utilizam a câmera de dispositivos locais para escanear a carteirinha na entrada da escola.
+* **Validação por Câmera:** Usuários cadastrados utilizam a câmera de dispositivos locais para escanear a carteirinha na entrada da escola.
 * **Leitura Local e Segura:** Executado em servidor interno com suporte a HTTPS/SSL próprio para permitir o uso da câmera do navegador com total segurança.
 * **Marcador de Presença Automático:** O aluno escaneado tem a presença registrada no dia e turno correspondente.
 * **Atribuição Automática de Falta:** Alunos sem registro de leitura até o final do período são pontuados automaticamente com falta.
+* **Bloqueio de Carteirinhas Inválidas:** Alunos transferidos externamente têm a carteirinha e a chamada bloqueadas automaticamente.
 
-### 🏛️ 3. Módulo de Gestão Escolar (Secretaria / Gestão)
-* **Cadastros Gerais:** Gerenciamento de escolas, funcionários, alunos, turmas e turnos.
+### 🏛️ 3. Módulo de Gestão Escolar (Diretoria / Secretaria / Administrativo)
+* **Cadastros Gerais:** Gerenciamento de escolas, diretores, usuários administrativos, alunos, turmas, turnos e calendário letivo.
+* **Login Simplificado:** Autenticação por login curto (não exige e-mail; o sistema normaliza automaticamente o valor informado).
+* **Papéis Visuais em Português:** `school_admin` → Diretor, `secretary` → Secretaria, `staff` → Administrativo.
+* **Permissões Granulares:** Cada usuário do administrativo recebe permissões específicas por módulo (classes, alunos, carteirinhas, chamada, relatórios, transferências, calendário, etc.).
 * **Histórico de Transferências:** Rastreabilidade completa do aluno. Permite transferir alunos entre turmas (mantendo histórico de onde ele veio) ou registrar indicativo de transferência externa.
-* **Relatórios Inteligentes:** Geração e visualização de relatórios mensais de frequência por turma (essencial para acompanhamento pedagógico e programas sociais).
+* **Relatórios Inteligentes:** Geração e visualização de relatórios mensais de frequência por turma e ano letivo, com filtro para acompanhamento do Bolsa Família e botão de impressão.
 * **Gestão de Anos Letivos:** Seleção e arquivamento de dados por Ano Escolar, permitindo consultar dados de anos anteriores a qualquer momento.
+* **Calendário Escolar:** Cadastro de dias letivos e eventos, vinculado automaticamente ao ano das turmas.
 
 ---
 
@@ -103,19 +109,20 @@ Módulos disponíveis:
    # edite SECRET_KEY e CRYPTO_KEY com valores seguros
    ```
 
-6. **Inicie o servidor:**
+6. **Inicie o servidor (HTTPS local na porta 8443):**
    ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+   uvicorn app.main:app --host 0.0.0.0 --port 8443 --ssl-keyfile certs/key.pem --ssl-certfile certs/cert.pem --reload
    ```
+   > A câmera para leitura de QR Code exige contexto seguro (HTTPS ou localhost), por isso o SisCares roda com certificado SSL próprio na porta 8443.
 
 7. **Crie o super-admin:**
    ```bash
-   python scripts/create_superadmin.py --email admin@siscares.local --password admin123 --name "Administrador"
+   python scripts/create_superadmin.py --email admin --password admin123 --name "Administrador"
    ```
 
 8. **Acesse o sistema:**
-   * Painel: http://localhost:8000/
-   * API docs: http://localhost:8000/docs
+   * Painel: https://localhost:8443/static/pages/index.html
+   * API docs: https://localhost:8443/docs
 
 ---
 
@@ -157,16 +164,19 @@ siscares/
 ---
 ## 🆕 Novidades (changelog rápido)
 
-Essas alterações recentes melhoram a emissão das carteirinhas e adicionam suporte à imagem de marca da escola:
+### Versão atual
 
-- **Upload de imagem da escola:** agora é possível enviar uma imagem (PNG/JPG/WEBP) pela página de cadastro/edição da escola. A imagem é armazenada em `frontend/static/uploads/` e o caminho é salvo em `schools.photo_url`.
-- **Imagem exibida nas carteirinhas:** se a escola possuir imagem cadastrada, ela será renderizada na área da carteirinha (tanto na geração em lote A4 quanto na carteirinha individual).
-- **Melhorias visuais:** removida a borda tracejada da área de imagem, ampliada a área e ajustada a renderização para reduzir serrilhado e distorção.
-- **Exportação PDF aprimorada:** ajustes no `html2pdf`/`html2canvas` para melhorar resolução (`scale: 3`), tempo de espera de imagens, e sobreposição de imagens para evitar distorção na rasterização.
-- **Carteirinha individual centralizada:** ao gerar/imprimir uma carteirinha individual, ela é centralizada na página durante a impressão.
-- **Turno na carteirinha:** a linha da turma agora mostra também o `Turno` da turma quando cadastrado.
+- **Rótulos de papéis em português:** `school_admin` → Diretor, `secretary` → Secretaria, `staff` → Administrativo, mantendo os códigos internos inalterados no backend.
+- **Login simplificado:** campos de "E-mail" trocados por "Login" nos formulários de usuários, diretores e login. O sistema continua normalizando o valor automaticamente.
+- **Filtro de ano letivo:** turmas, alunos e relatórios agora permitem filtrar por ano escolar.
+- **Calendário escolar vinculado:** o ano das turmas está ligado ao calendário letivo da escola.
+- **Relatórios aprimorados:** relatório de frequência inclui coluna de ano letivo, filtro Bolsa Família e botão de impressão.
+- **Bloqueio de transferências externas:** alunos transferidos externamente têm carteirinha e chamada bloqueadas, exibindo "Carteirinha inválida".
 
-Essas melhorias estão no código e já commitadas no repositório.
+### Melhorias anteriores
+
+- **Upload de imagem da escola:** envio de logotipo/marca pela página da escola; imagem renderizada nas carteirinhas (lote A4 e individual).
+- **Exportação PDF aprimorada:** melhoria de resolução, centralização da carteirinha individual e exibição do turno.
 
 ---
 

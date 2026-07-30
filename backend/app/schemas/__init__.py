@@ -174,6 +174,7 @@ class StudentResponse(StudentBase):
     encrypted_qr_payload: Optional[str] = None
     photo_url: Optional[str] = None
     is_active: bool
+    is_transferred_externally: bool = False
     created_at: datetime
     class_name: Optional[str] = None
     shift_name: Optional[str] = None
@@ -337,8 +338,10 @@ class LoginRequest(BaseModel):
 class FrequencyReportItem(BaseModel):
     class_id: int
     class_name: str
+    class_year: int
     student_id: int
     student_name: str
+    bolsa_familia: bool = False
     total_classes: int
     present_count: int
     absent_count: int

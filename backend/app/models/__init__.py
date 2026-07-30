@@ -108,6 +108,7 @@ class Student(Base):
     encrypted_qr_payload = Column(Text, nullable=True)
     bolsa_familia = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    is_transferred_externally = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     school = relationship("School", back_populates="students")

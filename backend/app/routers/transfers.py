@@ -26,6 +26,11 @@ def register_transfer(
             raise HTTPException(status_code=404, detail="Turma de destino não encontrada")
         payload.from_class_id = student.class_id
         student.class_id = payload.to_class_id
+        student.is_transferred_externally = False
+    elif payload.transfer_type == "external":
+        payload.from_class_id = student.class_id
+        student.class_id = None
+        student.is_transferred_externally = True
 
     transfer = TransferHistory(
         **payload.model_dump(),

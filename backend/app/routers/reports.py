@@ -17,6 +17,7 @@ def frequency_report(
     class_id: int | None = None,
     day: str | None = None,  # YYYY-MM-DD
     student_name: str | None = None,
+    bolsa_familia: bool | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_role("super_admin", "school_admin", "secretary", "staff", module="reports")),
 ):
@@ -30,4 +31,5 @@ def frequency_report(
         class_id=class_id,
         day=day,
         student_name=student_name,
+        bolsa_familia=bolsa_familia,
     )

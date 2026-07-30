@@ -5,7 +5,7 @@ let schools = [];
 async function init() {
     currentUser = await getMe();
     if (!currentUser || currentUser.role !== "super_admin") {
-        alert("Acesso restrito. Apenas administradores podem gerenciar gestores.");
+        alert("Acesso restrito. Apenas administradores podem gerenciar diretores.");
         window.location.href = "/static/pages/index.html";
         return;
     }
@@ -81,7 +81,7 @@ window.editManager = function(id) {
 };
 
 window.toggleManagerActive = async function(id, isActive) {
-    if (!confirm(isActive ? "Ativar gestor?" : "Desativar gestor?")) return;
+    if (!confirm(isActive ? "Ativar diretor?" : "Desativar diretor?")) return;
     try {
         await updateManager(id, { is_active: isActive });
         await loadManagers();

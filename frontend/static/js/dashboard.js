@@ -28,7 +28,13 @@ async function initDashboard() {
     console.log("Dashboard - usuário:", me);
     if (!me) return;
 
-    document.getElementById("userName").textContent = `${me.full_name} (${me.role})`;
+    const roleLabels = {
+        school_admin: "Diretor",
+        secretary: "Secretaria",
+        staff: "Administrativo",
+        super_admin: "Super Admin",
+    };
+    document.getElementById("userName").textContent = `${me.full_name} (${roleLabels[me.role] || me.role})`;
 
     // Carrega módulos habilitados da escola do usuário para exibir cards corretos
     let enabledModules = [];
@@ -52,7 +58,7 @@ async function initDashboard() {
         });
         loadModuleSchoolList();
     } else {
-        // Controla visibilidade dos cards de módulos opcionais para gestores escolares
+        // Controla visibilidade dos cards de módulos opcionais para diretores
         document.querySelectorAll('.cards a.card').forEach(link => {
             const moduleCode = Object.keys(MODULE_CODE_TO_CARD).find(code => link.id === MODULE_CODE_TO_CARD[code]);
             if (moduleCode) {
@@ -68,12 +74,12 @@ async function initDashboard() {
             }
         });
 
-        // Gestores escolares não gerenciam escolas nem gestores
+        // Diretores não gerenciam escolas nem diretores
         document.getElementById("nav-schools")?.classList.add("hidden");
         document.getElementById("nav-managers")?.classList.add("hidden");
     }
 
-    // Esconde cards que o usuário não tem permissão granular, exceto gestores/super_admin
+    // Esconde cards que o usuário não tem permissão granular, exceto diretores/super_admin
     if (me.role !== "school_admin" && me.role !== "super_admin") {
         document.querySelectorAll(".cards a.card").forEach(link => {
             const href = link.getAttribute("href");

@@ -26,6 +26,7 @@ def get_frequency_report(
     class_id: int | None = None,
     day: str | None = None,
     student_name: str | None = None,
+    bolsa_familia: bool | None = None,
 ) -> FrequencyReportResponse:
     # month esperado no formato YYYY-MM
     items: List[FrequencyReportItem] = []
@@ -58,6 +59,9 @@ def get_frequency_report(
 
         students = sorted(students, key=lambda s: s.full_name.lower())
 
+        if bolsa_familia is not None:
+            students = [s for s in students if s.bolsa_familia == bolsa_familia]
+
         for student in students:
             filters = [
                 Attendance.student_id == student.id,
@@ -75,8 +79,10 @@ def get_frequency_report(
             items.append(FrequencyReportItem(
                 class_id=cls.id,
                 class_name=cls.name,
+                class_year=cls.year,
                 student_id=student.id,
                 student_name=student.full_name,
+                bolsa_familia=student.bolsa_familia,
                 total_classes=effective_base,
                 present_count=present,
                 absent_count=absent,

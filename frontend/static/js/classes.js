@@ -1,4 +1,7 @@
+let academicYears = [];
+
 document.addEventListener("DOMContentLoaded", async () => {
+    await loadAcademicYears();
     await loadShifts();
     await loadClasses();
 
@@ -31,10 +34,47 @@ document.addEventListener("DOMContentLoaded", async () => {
         resetClassForm();
         await loadShifts();
         await loadClasses();
+        renderClasses();
     });
 
     document.getElementById("cancelEdit").addEventListener("click", resetClassForm);
+    document.getElementById("filter_year")?.addEventListener("change", renderClasses);
 });
+
+async function loadAcademicYears() {
+    try {
+        const me = await getMe();
+        if (!me || !me.school_id) {
+            academicYears = [];
+            return;
+        }
+        academicYears = await listAcademicYears(me.school_id);
+
+        const classYearSelect = document.getElementById("year");
+        const currentClassYear = classYearSelect.value;
+        classYearSelect.innerHTML = '<option value="">Selecione o ano letivo</option>' +
+            academicYears.map(y => `<option value="${y.year}">${y.year}</option>`).join("");
+        if (currentClassYear && academicYears.some(y => String(y.year) === currentClassYear)) {
+            classYearSelect.value = currentClassYear;
+        } else if (academicYears.length > 0) {
+            const active = academicYears.find(y => y.is_active);
+            classYearSelect.value = active ? active.year : academicYears[0].year;
+        }
+
+        const filterSelect = document.getElementById("filter_year");
+        if (filterSelect) {
+            const currentFilter = filterSelect.value;
+            filterSelect.innerHTML = '<option value="">Todos os anos</option>' +
+                academicYears.map(y => `<option value="${y.year}">${y.year}</option>`).join("");
+            if (currentFilter && academicYears.some(y => String(y.year) === currentFilter)) {
+                filterSelect.value = currentFilter;
+            }
+        }
+    } catch (err) {
+        console.error("Erro ao carregar anos letivos:", err);
+        academicYears = [];
+    }
+}
 
 async function loadShifts() {
     const shifts = await listShifts();
@@ -51,8 +91,19 @@ async function loadShifts() {
     }
 }
 
+let allClasses = [];
+
 async function loadClasses() {
-    const classes = await listClasses();
+    allClasses = await listClasses();
+    renderClasses();
+}
+
+function renderClasses() {
+    const filterYear = document.getElementById("filter_year")?.value || "";
+    const classes = filterYear
+        ? allClasses.filter(c => String(c.year) === filterYear)
+        : allClasses;
+
     const list = document.getElementById("classesList");
     if (!classes.length) {
         list.innerHTML = "<li class='empty-state'>Nenhuma turma cadastrada.</li>";
@@ -98,6 +149,12 @@ window.deleteClassItem = async function(id) {
 function resetClassForm() {
     document.getElementById("classForm").reset();
     document.getElementById("class_id").value = "";
-    document.getElementById("year").value = "2026";
+    const yearSelect = document.getElementById("year");
+    yearSelect.innerHTML = '<option value="">Selecione o ano letivo</option>' +
+        academicYears.map(y => `<option value="${y.year}">${y.year}</option>`).join("");
+    if (academicYears.length > 0) {
+        const active = academicYears.find(y => y.is_active);
+        yearSelect.value = active ? active.year : academicYears[0].year;
+    }
     document.getElementById("cancelEdit").classList.add("hidden");
 }
