@@ -1,6 +1,8 @@
 let scanner = null;
 let isProcessing = false;
 let lastScanned = "";
+let scannerStarted = false;
+let scannerInitializing = false;
 
 function getCurrentShift() {
     const hour = new Date().getHours();
@@ -12,6 +14,16 @@ function getCurrentShift() {
 function canScan() {
     const hour = new Date().getHours();
     return hour >= 6 && hour < 22;
+}
+
+function setStatus(message, type = "") {
+    const status = document.getElementById("statusMsg");
+    status.textContent = message;
+    status.className = type;
+}
+
+function isSecureCameraContext() {
+    return window.isSecureContext || location.hostname === "localhost" || location.hostname === "127.0.0.1";
 }
 
 function showOverlay(message, type = "success") {
@@ -31,26 +43,96 @@ async function init() {
     document.getElementById("shiftInfo").textContent = `Turno atual: ${shift.name}`;
 
     if (!canScan()) {
-        document.getElementById("statusMsg").textContent = "Leitura de QR Code permitida apenas entre 6h e 22h.";
-        document.getElementById("statusMsg").className = "error";
+        setStatus("Leitura de QR Code permitida apenas entre 6h e 22h.", "error");
         return;
     }
 
     scanner = new Html5Qrcode("reader");
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length) {
-            const rearCamera = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira") || c.label.toLowerCase().includes("environment"));
-            const cameraId = rearCamera ? rearCamera.id : cameras[0].id;
-            scanner.start(
-                cameraId,
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                onScanSuccess,
-                onScanFailure
-            );
-        } else {
-            document.getElementById("statusMsg").textContent = "Nenhuma câmera encontrada.";
+    const startButton = document.getElementById("startCameraBtn");
+    if (startButton) {
+        startButton.addEventListener("click", startScanner);
+    }
+
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (!isMobile) {
+        await startScanner();
+    } else {
+        setStatus("Toque em 'Ativar câmera' para iniciar a leitura do QR Code.", "warning");
+    }
+}
+
+async function startScanner() {
+    if (scannerInitializing || scannerStarted) return;
+
+    const button = document.getElementById("startCameraBtn");
+    if (button) {
+        button.disabled = true;
+    }
+
+    scannerInitializing = true;
+    setStatus("Solicitando acesso à câmera...", "warning");
+
+    try {
+        if (!isSecureCameraContext()) {
+            throw new Error("A câmera só funciona em uma conexão segura. Use HTTPS ou acesse pelo endereço localhost.");
         }
-    });
+
+        if (!navigator.mediaDevices?.getUserMedia) {
+            throw new Error("Este navegador não suporta acesso à câmera.");
+        }
+
+        const cameras = await Html5Qrcode.getCameras();
+        if (!cameras || !cameras.length) {
+            throw new Error("Nenhuma câmera disponível para este dispositivo.");
+        }
+
+        const cameraCandidates = [];
+        const rearCamera = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira") || c.label.toLowerCase().includes("environment"));
+        if (rearCamera) cameraCandidates.push(rearCamera.id);
+        if (cameras[0]) cameraCandidates.push(cameras[0].id);
+        cameraCandidates.push({ facingMode: { ideal: "environment" } });
+        cameraCandidates.push({ facingMode: "environment" });
+        cameraCandidates.push({ facingMode: "user" });
+
+        let lastError = null;
+        for (const candidate of cameraCandidates) {
+            try {
+                await scanner.start(
+                    candidate,
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0,
+                        disableFlip: false,
+                        videoConstraints: {
+                            facingMode: "environment"
+                        }
+                    },
+                    onScanSuccess,
+                    onScanFailure
+                );
+                scannerStarted = true;
+                setStatus("Câmera pronta. Aponte o QR Code para a leitura.", "success");
+                return;
+            } catch (error) {
+                lastError = error;
+            }
+        }
+
+        throw lastError || new Error("Não foi possível iniciar a câmera.");
+    } catch (error) {
+        const message = error?.message || "Não foi possível iniciar a câmera.";
+        if (message.includes("Permission") || message.includes("perm") || message.includes("denied")) {
+            setStatus("Permissão de câmera negada. Libere o acesso no navegador e tente novamente.", "error");
+        } else {
+            setStatus(message, "error");
+        }
+    } finally {
+        scannerInitializing = false;
+        if (button) {
+            button.disabled = false;
+        }
+    }
 }
 
 async function onScanSuccess(decodedText) {
@@ -61,13 +143,8 @@ async function onScanSuccess(decodedText) {
     }
 
     const payload = decodedText.trim();
-    console.log("QR raw:", decodedText);
-    console.log("QR trimmed:", payload);
-    console.log("QR length:", payload.length);
-    console.log("QR fernet?", looksLikeFernet(payload));
 
     if (!looksLikeFernet(payload)) {
-        console.warn("QR lido não parece um token SisCarEs; ignorando.");
         return;
     }
 
@@ -78,7 +155,9 @@ async function onScanSuccess(decodedText) {
     const status = document.getElementById("statusMsg");
 
     try {
-        await scanner.pause();
+        if (scannerStarted) {
+            await scanner.pause();
+        }
         await registerAttendance({ qr_payload: payload, shift_id: getCurrentShift().id });
         status.textContent = "Presença registrada com sucesso!";
         status.className = "success";
@@ -112,7 +191,7 @@ async function onScanSuccess(decodedText) {
         setTimeout(async () => {
             hideOverlay();
             status.textContent = "";
-            if (scanner) await scanner.resume();
+            if (scannerStarted && scanner) await scanner.resume();
             isProcessing = false;
         }, 2500);
     }
@@ -122,8 +201,7 @@ function looksLikeFernet(token) {
     return typeof token === "string" && token.startsWith("gAAAAAB") && token.length > 50;
 }
 
-function onScanFailure(error) {
-    // ignorar erros de leitura contínua
+function onScanFailure() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
