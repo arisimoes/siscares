@@ -45,11 +45,34 @@ def register_attendance(
     if student.is_transferred_externally:
         raise HTTPException(status_code=403, detail="Carteirinha inválida — aluno transferido externamente")
 
-    shift = db.query(Shift).filter(Shift.id == payload.shift_id, Shift.school_id == current_user.school_id).first()
+    today = date.today().isoformat()
+    is_temporary = qr_data.get("tmp") is True
+
+    if is_temporary:
+        qr_date = qr_data.get("date")
+        if qr_date != today:
+            raise HTTPException(status_code=403, detail="Carteirinha provisória expirada — data inválida")
+
+        expires_at_str = qr_data.get("exp")
+        if not expires_at_str:
+            raise HTTPException(status_code=400, detail="Carteirinha provisória sem validade")
+        try:
+            expires_at = datetime.fromisoformat(expires_at_str)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Carteirinha provisória com validade inválida")
+        if datetime.now() > expires_at:
+            raise HTTPException(status_code=403, detail="Carteirinha provisória expirada — turno encerrado")
+
+        shift_id = qr_data.get("shift")
+        if not shift_id:
+            raise HTTPException(status_code=400, detail="Carteirinha provisória sem turno")
+    else:
+        shift_id = payload.shift_id
+
+    shift = db.query(Shift).filter(Shift.id == shift_id, Shift.school_id == current_user.school_id).first()
     if not shift:
         raise HTTPException(status_code=404, detail="Turno não encontrado")
 
-    today = date.today().isoformat()
     existing = db.query(Attendance).filter(
         Attendance.student_id == student.id,
         Attendance.shift_id == shift.id,

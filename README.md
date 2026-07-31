@@ -24,6 +24,7 @@ O **SisCarEs** automatiza todo esse fluxo desde a portaria até a secretaria.
 * **Geração Automática:** Criação de carteirinhas em lote contendo: nome da escola, nome do aluno, ano/série escolar, turma e turno.
 * **QR Code Criptografado:** Cada carteirinha possui um QR Code único e seguro com os dados do aluno para evitar falsificações.
 * **Imagem da Escola:** Upload do logotipo/marca da escola para impressão nas carteirinhas.
+* **Acesso Único / Carteirinha Provisória:** Botão na lista de alunos para emitir uma carteirinha temporária com validade até o fim do turno do dia da geração. A geração é registrada nos logs do sistema.
 
 ### 📲 2. Portaria & Chamada via QR Code
 * **Validação por Câmera:** Usuários cadastrados utilizam a câmera de dispositivos locais para escanear a carteirinha na entrada da escola.
@@ -31,6 +32,7 @@ O **SisCarEs** automatiza todo esse fluxo desde a portaria até a secretaria.
 * **Marcador de Presença Automático:** O aluno escaneado tem a presença registrada no dia e turno correspondente.
 * **Atribuição Automática de Falta:** Alunos sem registro de leitura até o final do período são pontuados automaticamente com falta.
 * **Bloqueio de Carteirinhas Inválidas:** Alunos transferidos externamente têm a carteirinha e a chamada bloqueadas automaticamente.
+* **Carteirinha Provisória (Acesso Único):** Geração de carteirinhas temporárias válidas apenas até o fim do turno do aluno no dia da emissão. O leitor de QR reconhece automaticamente a carteirinha provisória, valida data/hora de expiração e registra a presença no turno correto.
 
 ### 🏛️ 3. Módulo de Gestão Escolar (Diretoria / Secretaria / Administrativo)
 * **Cadastros Gerais:** Gerenciamento de escolas, diretores, usuários administrativos, alunos, turmas, turnos e calendário letivo.
@@ -213,6 +215,8 @@ siscares/
 
 ### Versão atual
 
+- **Carteirinha Provisória (Acesso Único):** emissão de carteirinhas temporárias válidas até o fim do turno do aluno no dia da geração; leitura de QR Code reconhece e valida automaticamente a carteirinha provisória; registros de emissão aparecem no módulo "Registros".
+- **Filtro por turno na lista de alunos:** permite filtrar alunos pelo turno da turma, com padrão "Todos".
 - **Rótulos de papéis em português:** `school_admin` → Diretor, `secretary` → Secretaria, `staff` → Administrativo, mantendo os códigos internos inalterados no backend.
 - **Login simplificado:** campos de "E-mail" trocados por "Login" nos formulários de usuários, diretores e login. O sistema continua normalizando o valor automaticamente.
 - **Filtro de ano letivo:** turmas, alunos e relatórios agora permitem filtrar por ano escolar.

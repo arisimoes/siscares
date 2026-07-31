@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SisCarEs - Acesso Único</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
+    <style>
+        .temporary-stamp {
+            background: #dc2626;
+            color: #fff;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .temporary-validity {
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar no-print">
+        <div class="brand">
+            <img src="/static/img/logo-siscares.svg" alt="" class="nav-logo">
+            <span>SisCarEs</span>
+        </div>
+        <div class="menu">
+            <a href="/static/pages/students.html" class="btn">Voltar para alunos</a>
+            <button class="btn-secondary" onclick="window.print()">Imprimir</button>
+        </div>
+    </nav>
+    <main class="dashboard full-width">
+        <h2>Acesso Único - Carteirinha Provisória</h2>
+        <div id="cardSheet" class="sheet-wrapper">
+            <p class="empty-state">Carregando...</p>
+        </div>
+    </main>
+
+    <script src="/static/js/api.js?v=17"></script>
+    <script src="/static/js/temporary-card.js?v=1"></script>
+</body>
+</html>

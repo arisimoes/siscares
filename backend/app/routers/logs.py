@@ -4,7 +4,7 @@ from typing import List
 
 from app.db.session import get_db
 from app.core.security import get_current_user, require_role
-from app.models import User, Student, Class, TransferHistory, Attendance
+from app.models import User, Student, Class, TransferHistory, Attendance, TemporaryCard, Shift
 from app.schemas import LogEntry
 
 router = APIRouter(prefix="/logs", tags=["logs"])
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/logs", tags=["logs"])
 @router.get("/records", response_model=List[LogEntry])
 def list_logs(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role("school_admin", "secretary", "staff", module="logs")),
+    current_user: User = Depends(require_role("super_admin", "school_admin", "secretary", "staff", module="logs")),
 ):
     results = []
 
@@ -73,6 +73,35 @@ def list_logs(
             reason=j.justification or "-",
             registered_by_name=user.full_name if user else "-",
             registered_at=j.registered_at,
+        ))
+
+    # Carteirinhas provisórias (acesso único)
+    temporary_cards = (
+        db.query(TemporaryCard)
+        .join(Student, TemporaryCard.student_id == Student.id)
+        .join(Shift, TemporaryCard.shift_id == Shift.id)
+        .filter(Student.school_id == current_user.school_id)
+        .order_by(TemporaryCard.generated_at.desc())
+        .all()
+    )
+
+    for tc in temporary_cards:
+        student = db.query(Student).filter(Student.id == tc.student_id).first()
+        user = db.query(User).filter(User.id == tc.generated_by_user_id).first() if tc.generated_by_user_id else None
+        shift = db.query(Shift).filter(Shift.id == tc.shift_id).first()
+
+        results.append(LogEntry(
+            id=tc.id,
+            type="acesso único",
+            student_id=tc.student_id,
+            student_name=student.full_name if student else "-",
+            date=tc.date,
+            from_class_name=None,
+            to_class_name=None,
+            reason=f"Turno: {shift.name}" if shift else "-",
+            registered_by_name=user.full_name if user else "-",
+            registered_at=tc.generated_at,
+            extra=f"Expira em {tc.expires_at.strftime('%H:%M')}" if tc.expires_at else None,
         ))
 
     # Ordena por data/hora decrescente

@@ -65,6 +65,7 @@ async function listStudents(filters = {}) {
     const params = new URLSearchParams();
     if (filters.class_id) params.set("class_id", filters.class_id);
     if (filters.name) params.set("name", filters.name);
+    if (filters.shift_id) params.set("shift_id", filters.shift_id);
     const query = params.toString() ? `?${params.toString()}` : "";
     return api(`/students${query}`);
 }
@@ -72,6 +73,7 @@ async function createStudent(data) { return api("/students", { method: "POST", b
 async function updateStudent(id, data) { return api(`/students/${id}`, { method: "PUT", body: JSON.stringify(data) }); }
 async function deleteStudent(id, password) { return api(`/students/${id}`, { method: "DELETE", body: JSON.stringify({ password }) }); }
 async function getStudentCard(id) { return api(`/students/${id}/card`); }
+async function createTemporaryCard(studentId) { return api(`/students/${studentId}/temporary-card`, { method: "POST" }); }
 
 async function registerAttendance(data) { return api("/attendance", { method: "POST", body: JSON.stringify(data) }); }
 async function justifyAbsence(studentId, data) { return api(`/attendance/justify/${studentId}`, { method: "POST", body: JSON.stringify(data) }); }

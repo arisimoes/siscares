@@ -186,6 +186,34 @@ class StudentDeleteRequest(BaseModel):
     password: str
 
 
+class TemporaryCardCreate(BaseModel):
+    student_id: int
+
+
+class TemporaryCardResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    student_id: int
+    student_name: Optional[str] = None
+    shift_id: int
+    shift_name: Optional[str] = None
+    date: str
+    generated_at: datetime
+    generated_by_user_id: Optional[int] = None
+    generated_by_name: Optional[str] = None
+    expires_at: datetime
+    expires_at_iso: str
+    qr_payload: str
+    qr_base64: str
+    class_name: Optional[str] = None
+    school_name: Optional[str] = None
+    school_photo_url: Optional[str] = None
+    registration_code: Optional[str] = None
+    photo_url: Optional[str] = None
+    validity_label: str
+
+
 class AttendanceBase(BaseModel):
     student_id: int
     shift_id: int
@@ -249,6 +277,7 @@ class LogEntry(BaseModel):
     reason: Optional[str] = None
     registered_by_name: Optional[str] = None
     registered_at: datetime
+    extra: Optional[str] = None  # validade/descrição complementar
 
 
 class ModuleBase(BaseModel):

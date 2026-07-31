@@ -2,11 +2,16 @@ let allClasses = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadClasses();
+    await loadShifts();
     await loadAcademicYears();
     await loadFilterClasses();
     await loadStudents();
 
     document.getElementById("showTransferred")?.addEventListener("change", applyFilters);
+    document.getElementById("filterShift")?.addEventListener("change", () => {
+        loadFilterClasses();
+        applyFilters();
+    });
 
     document.getElementById("studentForm").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -41,6 +46,17 @@ async function loadClasses() {
     select.innerHTML = allClasses.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"}) - ${c.year}</option>`).join("");
 }
 
+async function loadShifts() {
+    try {
+        const shifts = await listShifts();
+        const select = document.getElementById("filterShift");
+        select.innerHTML = '<option value="">Todos</option>' +
+            shifts.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+    } catch (err) {
+        console.error("Erro ao carregar turnos:", err);
+    }
+}
+
 async function loadAcademicYears() {
     try {
         const me = await getMe();
@@ -62,9 +78,14 @@ async function loadAcademicYears() {
 
 async function loadFilterClasses() {
     const yearFilter = document.getElementById("filterYear")?.value || "";
-    const classes = yearFilter
-        ? allClasses.filter(c => String(c.year) === yearFilter)
-        : allClasses;
+    const shiftFilter = document.getElementById("filterShift")?.value || "";
+    let classes = allClasses;
+    if (yearFilter) {
+        classes = classes.filter(c => String(c.year) === yearFilter);
+    }
+    if (shiftFilter) {
+        classes = classes.filter(c => String(c.shift_id) === shiftFilter);
+    }
     const select = document.getElementById("filterClass");
     select.innerHTML = '<option value="">Todas</option>' +
         classes.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"}) - ${c.year}</option>`).join("");
@@ -73,11 +94,13 @@ async function loadFilterClasses() {
 async function loadStudents() {
     const classFilter = document.getElementById("filterClass").value;
     const nameFilter = document.getElementById("filterName").value.trim();
+    const shiftFilter = document.getElementById("filterShift")?.value || "";
     const yearFilter = document.getElementById("filterYear")?.value || "";
     const showTransferred = document.getElementById("showTransferred")?.checked || false;
     const filters = {};
     if (classFilter) filters.class_id = classFilter;
     if (nameFilter) filters.name = nameFilter;
+    if (shiftFilter) filters.shift_id = shiftFilter;
     let students = await listStudents(filters);
     if (yearFilter) {
         const allowedClassIds = new Set(allClasses.filter(c => String(c.year) === yearFilter).map(c => c.id));
@@ -95,7 +118,7 @@ async function loadStudents() {
             <td>${s.registration_code || "-"}</td>
             <td>${s.bolsa_familia ? "Sim" : "Não"}</td>
             <td class="actions">
-                ${s.is_transferred_externally ? '' : `<button class="btn-justify" onclick="openJustifyModal(${s.id}, '${escapeHtml(s.full_name)}')">Justificar</button><a class="btn" href="/static/pages/card.html?student_id=${s.id}">Carteirinha</a>`}
+                ${s.is_transferred_externally ? '' : `<button class="btn-justify" onclick="openJustifyModal(${s.id}, '${escapeHtml(s.full_name)}')">Justificar</button><a class="btn" href="/static/pages/card.html?student_id=${s.id}">Carteirinha</a><button class="btn-warning" onclick="openTemporaryCard(${s.id}, '${escapeHtml(s.full_name)}')">Acesso único</button>`}
                 <button class="btn-secondary" onclick="editStudent(${s.id}, '${escapeHtml(s.full_name)}', '${escapeHtml(s.birth_date || "")}', '${escapeHtml(s.cpf || "")}', '${escapeHtml(s.registration_code || "")}', ${s.class_id || 'null'}, ${s.bolsa_familia})">Editar</button>
                 <button class="btn-danger" onclick="deleteStudentItem(${s.id})">Excluir</button>
             </td>
@@ -169,6 +192,23 @@ window.deleteStudentItem = async function(id) {
 
 window.applyFilters = async function() {
     await loadStudents();
+};
+
+window.openTemporaryCard = async function(studentId, fullName) {
+    if (!confirm(`Gerar carteirinha de acesso único para ${fullName}?`)) return;
+    try {
+        const data = await createTemporaryCard(studentId);
+        const params = new URLSearchParams({
+            student_id: data.student_id,
+            card_id: data.id,
+            validity: data.validity_label,
+            qr: data.qr_base64,
+            generated: data.generated_at,
+        });
+        window.open(`/static/pages/temporary-card.html?${params.toString()}`, "_blank");
+    } catch (err) {
+        alert(err.message || "Erro ao gerar acesso único.");
+    }
 };
 
 function resetForm() {

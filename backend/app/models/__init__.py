@@ -115,6 +115,24 @@ class Student(Base):
     class_ = relationship("Class", back_populates="students")
     attendances = relationship("Attendance", back_populates="student")
     transfers = relationship("TransferHistory", back_populates="student")
+    temporary_cards = relationship("TemporaryCard", back_populates="student", order_by="desc(TemporaryCard.generated_at)")
+
+
+class TemporaryCard(Base):
+    __tablename__ = "temporary_cards"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"), nullable=False)
+    shift_id = Column(Integer, ForeignKey("shifts.id"), nullable=False)
+    date = Column(String(10), nullable=False)  # YYYY-MM-DD
+    generated_at = Column(DateTime, default=datetime.utcnow)
+    generated_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    expires_at = Column(DateTime, nullable=False)
+    qr_payload = Column(Text, nullable=False)
+
+    student = relationship("Student", back_populates="temporary_cards")
+    shift = relationship("Shift")
+    generated_by = relationship("User")
 
 
 class Attendance(Base):

@@ -15,8 +15,13 @@ def build_student_qr_payload(student) -> Dict[str, Any]:
     }
 
 
-def generate_encrypted_qr_payload(student) -> str:
-    payload = json.dumps(build_student_qr_payload(student), separators=(",", ":"), ensure_ascii=False)
+def generate_encrypted_qr_payload(student=None, payload_dict=None) -> str:
+    if payload_dict is not None:
+        payload = json.dumps(payload_dict, separators=(",", ":"), ensure_ascii=False)
+    elif student is not None:
+        payload = json.dumps(build_student_qr_payload(student), separators=(",", ":"), ensure_ascii=False)
+    else:
+        raise ValueError("Informe student ou payload_dict")
     return encrypt_value(payload)
 
 

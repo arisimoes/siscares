@@ -19,6 +19,11 @@ async function loadLogs() {
         tbody.innerHTML = filtered.map(log => {
             const date = new Date(log.registered_at).toLocaleString("pt-BR", { timeZone: "UTC" });
             const isTransfer = log.type.toLowerCase() === "transferência";
+            const isTemporary = log.type.toLowerCase() === "acesso único";
+            let detail = escapeHtml(log.reason || "-");
+            if (isTemporary && log.extra) {
+                detail += ` <small>(${escapeHtml(log.extra)})</small>`;
+            }
             return `
                 <tr>
                     <td>${date}</td>
@@ -27,7 +32,7 @@ async function loadLogs() {
                     <td>${isTransfer ? escapeHtml(log.from_class_name || "-") : "-"}</td>
                     <td>${isTransfer ? escapeHtml(log.to_class_name || "-") : "-"}</td>
                     <td>${log.date ? formatDate(log.date) : "-"}</td>
-                    <td>${escapeHtml(log.reason || "-")}</td>
+                    <td>${detail}</td>
                     <td>${escapeHtml(log.registered_by_name || "-")}</td>
                 </tr>
             `;

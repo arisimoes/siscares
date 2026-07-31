@@ -392,6 +392,13 @@ button:hover, .btn:hover { background: var(--primary-dark); }
 
 .btn-danger:hover { background: #b91c1c; }
 
+.btn-warning {
+    background: #16a34a;
+    margin-top: 0.5rem;
+}
+
+.btn-warning:hover { background: #15803d; }
+
 .btn-justify {
     background: #f59e0b;
     margin-top: 0.5rem;
@@ -419,8 +426,14 @@ button:hover, .btn:hover { background: var(--primary-dark); }
 td.actions button,
 td.actions .btn {
     margin-top: 0;
+    margin-right: 0.35rem;
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
+}
+
+td.actions button:last-child,
+td.actions .btn:last-child {
+    margin-right: 0;
 }
 
 .form-actions {

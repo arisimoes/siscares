@@ -76,11 +76,10 @@ async function onScanSuccess(decodedText) {
     isProcessing = true;
     lastScanned = payload;
     const status = document.getElementById("statusMsg");
-    const shiftId = getCurrentShift().id;
 
     try {
         await scanner.pause();
-        await registerAttendance({ qr_payload: payload, shift_id: shiftId });
+        await registerAttendance({ qr_payload: payload, shift_id: getCurrentShift().id });
         status.textContent = "Presença registrada com sucesso!";
         status.className = "success";
         showOverlay("✓ Presença confirmada!");
