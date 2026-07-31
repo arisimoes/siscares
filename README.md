@@ -215,7 +215,7 @@ siscares/
 
 ### Versão atual
 
-- **Carteirinha Provisória (Acesso Único):** emissão de carteirinhas temporárias válidas até o fim do turno do aluno no dia da geração; leitura de QR Code reconhece e valida automaticamente a carteirinha provisória; registros de emissão aparecem no módulo "Registros".
+- **Carteirinha Provisória (Acesso Único):** emissão de carteirinhas temporárias válidas até o fim do turno do aluno no dia da geração; leitura de QR Code reconhece e valida automaticamente a carteirinha provisória; a exibição do QR foi ajustada para ficar maior e mais nítida, melhorando a leitura no celular e na portaria.
 - **Filtro por turno na lista de alunos:** permite filtrar alunos pelo turno da turma, com padrão "Todos".
 - **Rótulos de papéis em português:** `school_admin` → Diretor, `secretary` → Secretaria, `staff` → Administrativo, mantendo os códigos internos inalterados no backend.
 - **Login simplificado:** campos de "E-mail" trocados por "Login" nos formulários de usuários, diretores e login. O sistema continua normalizando o valor automaticamente.
