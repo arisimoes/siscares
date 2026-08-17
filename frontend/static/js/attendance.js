@@ -105,10 +105,19 @@ async function init() {
 let availableCameras = [];
 let currentCameraIndex = 0;
 
-async function startScanner(preferredCameraId = null) {
+function getRearCamera() {
+    return availableCameras.find((c, idx) => {
+        const label = c.label.toLowerCase();
+        const isRear = label.includes("back") || label.includes("traseira") || label.includes("environment") || label.includes("rear");
+        if (isRear) currentCameraIndex = idx;
+        return isRear;
+    });
+}
+
+async function startScanner(preferredCameraId = null, preferredIndex = null) {
     if (scannerInitializing) return;
     if (scannerStarted && scanner) {
-        await scanner.stop();
+        try { await scanner.stop(); } catch (e) { /* ignore */ }
         scannerStarted = false;
     }
     logDebug("Solicitando início da câmera");
@@ -137,12 +146,18 @@ async function startScanner(preferredCameraId = null) {
         }
 
         const cameraCandidates = [];
-        if (preferredCameraId) cameraCandidates.push(preferredCameraId);
-        const rearCamera = availableCameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira") || c.label.toLowerCase().includes("environment"));
+        // 1. Tenta usar facingMode "environment" por constraints (funciona melhor em Android).
+        cameraCandidates.push({ facingMode: { exact: "environment" } });
+        cameraCandidates.push({ facingMode: "environment" });
+        // 2. Fallback por cameraId, se o usuário preferiu uma específica.
+        if (preferredCameraId) {
+            cameraCandidates.push(preferredCameraId);
+        } else if (preferredIndex !== null && availableCameras[preferredIndex]) {
+            cameraCandidates.push(availableCameras[preferredIndex].id);
+        }
+        const rearCamera = getRearCamera();
         if (rearCamera) cameraCandidates.push(rearCamera.id);
         if (availableCameras[0]) cameraCandidates.push(availableCameras[0].id);
-        cameraCandidates.push({ facingMode: { ideal: "environment" } });
-        cameraCandidates.push({ facingMode: "environment" });
         cameraCandidates.push({ facingMode: "user" });
 
         // qrbox menor: força o QR a ocupar mais do frame e melhora foco em câmeras frágeis.
@@ -163,6 +178,7 @@ async function startScanner(preferredCameraId = null) {
                         disableFlip: false,
                         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                         videoConstraints: {
+                            facingMode: candidate && typeof candidate === "object" && candidate.facingMode ? candidate.facingMode : undefined,
                             width: { ideal: 1920 },
                             height: { ideal: 1080 }
                         }
@@ -206,7 +222,7 @@ function setupSwitchCameraButton() {
         currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
         const next = availableCameras[currentCameraIndex];
         logDebug("Trocando câmera manualmente", { index: currentCameraIndex, label: next.label });
-        startScanner(next.id);
+        startScanner(next.id, currentCameraIndex);
     };
 }
 
