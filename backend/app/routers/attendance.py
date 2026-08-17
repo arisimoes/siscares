@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import date, datetime
+from datetime import date, datetime, time
 
 from app.db.session import get_db
 from app.core.security import get_current_user, require_role
@@ -10,6 +10,38 @@ from app.services.qr_service import decrypt_qr_payload
 from app.core.module_guard import require_module_for_current_school
 
 router = APIRouter(prefix="/attendance", tags=["attendance"])
+
+
+def _parse_time(value: str):
+    try:
+        return time(*map(int, value.split(":")))
+    except Exception:
+        return None
+
+
+def _check_shift_window(shift: Shift):
+    now = datetime.now()
+    start = _parse_time(shift.start_time) if shift.start_time else None
+    end = _parse_time(shift.end_time) if shift.end_time else None
+
+    if start and end:
+        if start < end:
+            in_window = start <= now.time() <= end
+        else:
+            # turno cruza a meia-noite
+            in_window = now.time() >= start or now.time() <= end
+    elif end:
+        in_window = now.time() <= end
+    elif start:
+        in_window = now.time() >= start
+    else:
+        return
+
+    if not in_window:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Leitura fora do horário do turno {shift.name} ({shift.start_time or '--:--'} às {shift.end_time or '--:--'})"
+        )
 
 
 def _check_attendance_window():
@@ -79,6 +111,8 @@ def register_attendance(
     shift = db.query(Shift).filter(Shift.id == shift_id, Shift.school_id == current_user.school_id).first()
     if not shift:
         raise HTTPException(status_code=404, detail="Turno não encontrado")
+
+    _check_shift_window(shift)
 
     existing = db.query(Attendance).filter(
         Attendance.student_id == student.id,

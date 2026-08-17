@@ -165,11 +165,16 @@ async function onScanSuccess(decodedText) {
         setTimeout(() => window.location.reload(), 1200);
     } catch (err) {
         const msg = err.message || "";
+        const isOutOfHours = msg.toLowerCase().includes("fora do horário") || msg.toLowerCase().includes("horário do turno");
         const isDuplicate = msg.toLowerCase().includes("já registrada");
         const isInvalidQr = msg.toLowerCase().includes("qr code") || msg.toLowerCase().includes("inválido") || msg.toLowerCase().includes("corrompido");
         const isInactive = msg.toLowerCase().includes("inativo") || msg.toLowerCase().includes("cancelada");
 
-        if (isDuplicate) {
+        if (isOutOfHours) {
+            status.textContent = msg;
+            status.className = "warning";
+            showOverlay("⚠ " + msg, "warning");
+        } else if (isDuplicate) {
             status.textContent = msg;
             status.className = "warning";
             showOverlay("⚠ " + msg, "warning");
