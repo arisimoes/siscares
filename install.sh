@@ -241,10 +241,11 @@ pip install -r "$BACKEND_DIR/requirements.txt"
 SECRET_KEY=$(generate_secret)
 CRYPTO_KEY=$(generate_crypto_key)
 
-log "Gerando par de chaves RSA para assinatura de QR codes..."
+log "Gerando par de chaves RSA para assinatura e chave base HMAC dos QR codes..."
 KEYS=$(generate_signing_keys)
 SIGNING_PRIVATE_KEY=$(echo "$KEYS" | head -n1)
 SIGNING_PUBLIC_KEY=$(echo "$KEYS" | tail -n1)
+log "Chaves geradas. QR codes de carteirinha usarão assinatura HMAC compacta derivada destas chaves."
 
 log "Criando arquivo de configuração .env..."
 cat > "$BACKEND_DIR/.env" <<EOF
