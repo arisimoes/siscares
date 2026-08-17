@@ -7,11 +7,14 @@ from app.core.crypto import encrypt_value, decrypt_value, sign_value, verify_sig
 
 
 def build_student_qr_payload(student) -> Dict[str, Any]:
+    # Ano letivo vinculado à turma atual do aluno.
+    academic_year = student.class_.year if student.class_ else None
     return {
         "sid": student.id,
         "sch": student.school_id,
         "cls": student.class_id,
         "act": student.is_active,
+        "year": academic_year,
     }
 
 

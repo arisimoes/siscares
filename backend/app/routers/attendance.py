@@ -48,6 +48,13 @@ def register_attendance(
     today = date.today().isoformat()
     is_temporary = qr_data.get("tmp") is True
 
+    if not is_temporary:
+        # Validação do ano letivo: a carteirinha normal só vale para o ano da turma em que foi gerada.
+        current_year = student.class_.year if student.class_ else date.today().year
+        qr_year = qr_data.get("year")
+        if qr_year is not None and qr_year != current_year:
+            raise HTTPException(status_code=403, detail="Carteirinha inválida — ano letivo expirado")
+
     if is_temporary:
         qr_date = qr_data.get("date") or qr_data.get("d")
         if qr_date != today:
