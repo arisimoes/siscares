@@ -835,11 +835,11 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .sheet-page .card-qrcode {
-    width: clamp(52px, 9vw, 78px);
-    height: clamp(52px, 9vw, 78px);
-    padding: 3px;
+    width: clamp(90px, 12vw, 120px);
+    height: clamp(90px, 12vw, 120px);
+    padding: 4px;
     background: white;
-    image-rendering: auto;
+    image-rendering: pixelated;
 }
 
 .sheet-page .card-footer {
@@ -1243,8 +1243,8 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .sheet-page .card-qrcode {
-    width: 80px;
-    height: 80px;
+    width: 110px;
+    height: 110px;
     max-width: none;
     max-height: none;
     image-rendering: pixelated;
@@ -1383,8 +1383,8 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .print-a4-page .card-qrcode {
-    width: 24mm;
-    height: 24mm;
+    width: 32mm;
+    height: 32mm;
     image-rendering: pixelated;
     padding: 1.5mm;
     background: white;

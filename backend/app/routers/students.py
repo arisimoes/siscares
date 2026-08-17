@@ -147,7 +147,7 @@ def student_card(
     import qrcode
     qr_b64 = generate_qr_code_base64(
         student.encrypted_qr_payload,
-        size=12,
+        size=16,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
     )
     class_ = db.query(Class).filter(Class.id == student.class_id).first()
