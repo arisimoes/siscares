@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SisCarEs - Calendário Escolar</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=5">
+    <link rel="stylesheet" href="/static/css/style.css?v=6">
     <style>
         .calendar-header { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
         .calendar-header select, .calendar-header button { padding: 0.5rem; }
@@ -29,6 +29,8 @@
         .month-days .day.holiday { background: #ffcc80; color: #7c4a00; font-weight: bold; }
         .month-days .day.event { background: #fff59d; color: #7a6a00; }
         .month-days .day.school { background: #d4edda; color: #155724; }
+        .month-days .day.out-of-year { background: #f8f9fa; color: #adb5bd; cursor: default; }
+        .month-days .day.out-of-year:hover { background: #f8f9fa; }
         .month-days .day.selected { outline: 2px solid #0d6efd; }
         .legend { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; font-size: 0.85rem; }
         .legend span { display: inline-flex; align-items: center; gap: 0.3rem; }
@@ -66,9 +68,10 @@
             <span><span class="dot" style="background:#ffcc80"></span> Feriado</span>
             <span><span class="dot" style="background:#fff59d"></span> Data comemorativa</span>
             <span><span class="dot" style="background:#f0f0f0"></span> Fim de semana</span>
+            <span><span class="dot" style="background:#f8f9fa"></span> Fora do ano letivo</span>
         </div>
 
-        <p style="font-size:0.85rem;color:#666;">Clique sobre um dia para alternar entre: Dia de aula → Feriado → Data comemorativa → Fim de semana.</p>
+        <p style="font-size:0.85rem;color:#666;">Clique sobre um dia para alternar entre: Dia de aula → Feriado → Data comemorativa → Fim de semana. Dias fora do período do ano letivo não podem ser editados.</p>
 
         <div id="yearGrid" class="year-grid"></div>
     </main>
@@ -86,7 +89,7 @@
         </div>
     </div>
 
-    <script src="/static/js/api.js?v=14"></script>
-    <script src="/static/js/calendar.js?v=4"></script>
+    <script src="/static/js/api.js?v=15"></script>
+    <script src="/static/js/calendar.js?v=5"></script>
 </body>
 </html>

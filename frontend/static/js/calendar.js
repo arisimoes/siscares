@@ -75,6 +75,19 @@ function renderYear(year) {
     }
 }
 
+function toISODate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function isDateInAcademicYear(dateStr) {
+    const yearObj = years.find(y => y.year === currentYear);
+    if (!yearObj) return true;
+    return dateStr >= yearObj.start_date && dateStr <= yearObj.end_date;
+}
+
 const TYPE_CYCLE = ["school", "holiday", "event", "weekend"];
 
 function renderMonth(year, month, container) {
@@ -90,23 +103,30 @@ function renderMonth(year, month, container) {
         const dateStr = toISODate(date);
         const dayData = calendarDays[dateStr];
         const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-        const dayType = dayData ? dayData.day_type : (isWeekend ? "weekend" : "school");
+        const inYear = isDateInAcademicYear(dateStr);
+
+        let dayType;
+        if (dayData) {
+            dayType = dayData.day_type;
+        } else if (!inYear) {
+            dayType = "out-of-year";
+        } else {
+            dayType = isWeekend ? "weekend" : "school";
+        }
+
         const el = document.createElement("div");
         el.className = `day ${dayType}`;
         el.textContent = day;
         el.title = dayData?.description || "";
         el.dataset.date = dateStr;
         el.dataset.id = dayData?.id || "";
-        el.onclick = () => cycleDayType(el);
+        if (inYear) {
+            el.onclick = () => cycleDayType(el);
+        } else {
+            el.style.cursor = "default";
+        }
         container.appendChild(el);
     }
-}
-
-function toISODate(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const d = String(date.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
 }
 
 async function cycleDayType(el) {

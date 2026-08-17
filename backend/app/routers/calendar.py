@@ -95,9 +95,19 @@ def list_calendar_days(
     _require_school_access(current_user, school_id)
     query = db.query(SchoolCalendarDay).filter(SchoolCalendarDay.school_id == school_id)
     if year:
-        start = f"{year}-01-01"
-        end = f"{year}-12-31"
-        query = query.filter(SchoolCalendarDay.date >= start, SchoolCalendarDay.date <= end)
+        academic_year = db.query(SchoolAcademicYear).filter(
+            SchoolAcademicYear.school_id == school_id,
+            SchoolAcademicYear.year == year,
+        ).first()
+        if academic_year:
+            query = query.filter(
+                SchoolCalendarDay.date >= academic_year.start_date,
+                SchoolCalendarDay.date <= academic_year.end_date,
+            )
+        else:
+            start = f"{year}-01-01"
+            end = f"{year}-12-31"
+            query = query.filter(SchoolCalendarDay.date >= start, SchoolCalendarDay.date <= end)
     return query.order_by(SchoolCalendarDay.date).all()
 
 
