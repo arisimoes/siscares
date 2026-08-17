@@ -119,8 +119,16 @@ def register_attendance(
         Attendance.shift_id == shift.id,
         Attendance.date == today,
     ).first()
+
     if existing:
-        raise HTTPException(status_code=409, detail="Presença já registrada para este aluno hoje neste turno")
+        if existing.status == "present":
+            raise HTTPException(status_code=409, detail="Presença já registrada para este aluno hoje neste turno")
+        # Se o scheduler criou uma falta automática, atualiza para presente no QR scan.
+        existing.status = "present"
+        existing.registered_by_user_id = current_user.id
+        db.commit()
+        db.refresh(existing)
+        return existing
 
     attendance = Attendance(
         student_id=student.id,
