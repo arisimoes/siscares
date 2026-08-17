@@ -10,10 +10,22 @@ function escapeHtml(text) {
 
 async function renderTemporaryCard() {
     const params = new URLSearchParams(window.location.search);
-    const studentId = params.get("student_id");
-    const cardId = params.get("card_id");
+    let studentId = params.get("student_id");
+    let cardId = params.get("card_id");
     const validity = params.get("validity") || "Válido até o fim do turno";
-    const qrBase64 = params.get("qr");
+    let qrBase64 = params.get("qr");
+
+    try {
+        const storedCard = localStorage.getItem("siscaresTemporaryCardData");
+        if (storedCard) {
+            const parsed = JSON.parse(storedCard);
+            if (!studentId && parsed.student_id) studentId = String(parsed.student_id);
+            if (!cardId && parsed.card_id) cardId = String(parsed.card_id);
+            if (!qrBase64 && parsed.qr_base64) qrBase64 = parsed.qr_base64;
+        }
+    } catch (err) {
+        console.warn("Não foi possível ler os dados da carteirinha provisória armazenados.", err);
+    }
 
     if (!studentId || !cardId) {
         document.getElementById("cardSheet").innerHTML = "\u003cp class='error'\u003eDados da carteirinha provisória ausentes.\u003c/p\u003e";

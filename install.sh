@@ -32,18 +32,57 @@ generate_crypto_key() {
     python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 }
 
+urlencode() {
+    python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$1"
+}
+
 ask() {
     local prompt="$1"
     local default="${2:-}"
+    local answer=""
     read -rp "$prompt" answer
     echo "${answer:-$default}"
 }
 
 ask_secret() {
     local prompt="$1"
+    local answer=""
     read -srp "$prompt" answer
     echo
     echo "$answer"
+}
+
+ask_required() {
+    local prompt="$1"
+    local answer=""
+    while true; do
+        read -rp "$prompt" answer
+        if [[ -n "${answer// /}" ]]; then
+            echo "$answer"
+            return
+        fi
+        err "Resposta obrigatória. Tente novamente."
+    done
+}
+
+ask_secret_confirm() {
+    local prompt="$1"
+    local confirm_prompt="$2"
+    local pass1=""
+    local pass2=""
+    while true; do
+        pass1=$(ask_secret "$prompt")
+        if [[ -z "$pass1" ]]; then
+            err "Senha não pode ser vazia. Tente novamente."
+            continue
+        fi
+        pass2=$(ask_secret "$confirm_prompt")
+        if [[ "$pass1" == "$pass2" ]]; then
+            echo "$pass1"
+            return
+        fi
+        err "As senhas não coincidem. Tente novamente."
+    done
 }
 
 # --- 1. Boas-vindas e detecção de OS ---
@@ -73,7 +112,18 @@ apt-get install -y \
     postgresql \
     postgresql-client \
     curl \
-    net-tools
+    net-tools \
+    acl || true
+
+if ! command -v python3 &>/dev/null; then
+    err "python3 não foi encontrado após a instalação. Verifique o gerenciador de pacotes."
+    exit 1
+fi
+
+if ! command -v psql &>/dev/null; then
+    err "psql (postgresql-client) não foi encontrado após a instalação."
+    exit 1
+fi
 
 # --- 3. Perguntar configurações do banco de dados ---
 echo
@@ -88,46 +138,71 @@ DB_ADMIN_PASS=""
 DB_PASS=$(generate_password)
 
 if [[ "$DB_MODE" == "R" ]]; then
-    DB_HOST=$(ask "Host do banco de dados (ex: db.exemplo.com): ")
+    DB_HOST=$(ask_required "Host do banco de dados (ex: db.exemplo.com): ")
     DB_PORT=$(ask "Porta do banco de dados (padrão 5432): " "5432")
     DB_ADMIN=$(ask "Usuário administrador do PostgreSQL (ex: postgres): " "postgres")
-    DB_ADMIN_PASS=$(ask_secret "Senha do usuário administrador '$DB_ADMIN': ")
+    DB_ADMIN_PASS=$(ask_secret_confirm "Senha do usuário administrador '$DB_ADMIN': " "Confirme a senha do administrador '$DB_ADMIN': ")
     export PGPASSWORD="$DB_ADMIN_PASS"
     DB_CONNECTION="-h $DB_HOST -p $DB_PORT -U $DB_ADMIN"
 else
     DB_CONNECTION="-U postgres"
     log "Iniciando e habilitando PostgreSQL local..."
-    systemctl start postgresql
-    systemctl enable postgresql
+    systemctl start postgresql || {
+        err "Falha ao iniciar o PostgreSQL. Verifique o estado com: systemctl status postgresql"
+        exit 1
+    }
+    systemctl enable postgresql || true
 fi
 
 # --- 4. Criar banco e usuário ---
 log "Criando usuário e banco de dados do SisCarEs..."
 
-CREATE_SQL="
-DO \$\$
+# Gera senha segura sem caracteres que confundem URL/escaping
+DB_PASS=$(generate_password)
+
+CREATE_SQL_FILE="$(mktemp)"
+trap 'rm -f "$CREATE_SQL_FILE"' EXIT
+
+cat > "$CREATE_SQL_FILE" <<'PSQL_EOF'
+DO $$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$DB_USER') THEN
-        CREATE ROLE $DB_USER WITH LOGIN PASSWORD '$DB_PASS';
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'db_user') THEN
+        CREATE ROLE :db_user WITH LOGIN PASSWORD :'db_pass';
     ELSE
-        ALTER ROLE $DB_USER WITH PASSWORD '$DB_PASS';
+        ALTER ROLE :db_user WITH PASSWORD :'db_pass';
     END IF;
-END\$\$;
+END $$;
 
-SELECT 'CREATE DATABASE $DB_NAME OWNER $DB_USER' WHERE NOT EXISTS (
-    SELECT FROM pg_database WHERE datname = '$DB_NAME'
-)\gexec
+SELECT 'CREATE DATABASE ' || :'db_name' || ' OWNER ' || :'db_user'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = :'db_name') \gexec
 
-GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
-"
+GRANT ALL PRIVILEGES ON DATABASE :db_name TO :db_user;
+PSQL_EOF
 
-if [[ "$DB_MODE" == "L" ]]; then
-    sudo -u postgres psql -c "$CREATE_SQL"
-else
-    psql $DB_CONNECTION -c "$CREATE_SQL"
+run_psql() {
+    if [[ "$DB_MODE" == "L" ]]; then
+        sudo -u postgres psql \
+            -v db_user="$DB_USER" \
+            -v db_name="$DB_NAME" \
+            -v db_pass="$DB_PASS" \
+            -f "$CREATE_SQL_FILE"
+    else
+        psql $DB_CONNECTION \
+            -v db_user="$DB_USER" \
+            -v db_name="$DB_NAME" \
+            -v db_pass="$DB_PASS" \
+            -f "$CREATE_SQL_FILE"
+    fi
+}
+
+if ! run_psql; then
+    err "Falha ao criar o usuário/banco de dados do SisCarEs."
+    err "Verifique se o PostgreSQL está acessível e se as credenciais do administrador estão corretas."
+    exit 1
 fi
 
-DATABASE_URL="postgresql://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME"
+DB_PASS_ENCODED=$(urlencode "$DB_PASS")
+DATABASE_URL="postgresql://$DB_USER:$DB_PASS_ENCODED@$DB_HOST:$DB_PORT/$DB_NAME"
 
 # --- 5. Configurar ambiente Python ---
 log "Configurando ambiente Python..."
@@ -143,13 +218,14 @@ SECRET_KEY=$(generate_secret)
 CRYPTO_KEY=$(generate_crypto_key)
 
 log "Criando arquivo de configuração .env..."
+# Salva DATABASE_URL com aspas para proteger caracteres especiais da senha
 cat > "$BACKEND_DIR/.env" <<EOF
 APP_NAME=SisCarEs
 DEBUG=False
 SECRET_KEY=$SECRET_KEY
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=480
-DATABASE_URL=$DATABASE_URL
+DATABASE_URL="$DATABASE_URL"
 CRYPTO_KEY=$CRYPTO_KEY
 UPLOAD_DIR=../frontend/static/uploads
 MAX_UPLOAD_SIZE_MB=5
@@ -167,11 +243,16 @@ SSL_OPTION=$(echo "$SSL_OPTION" | tr '[:lower:]' '[:upper:]')
 mkdir -p "$CERTS_DIR"
 if [[ "$SSL_OPTION" == "S" ]]; then
     log "Gerando certificado SSL autoassinado..."
+    SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+    if [[ -z "$SERVER_IP" ]]; then
+        SERVER_IP="siscares.local"
+    fi
     openssl req -x509 -newkey rsa:2048 \
         -keyout "$CERTS_DIR/key.pem" \
         -out "$CERTS_DIR/cert.pem" \
         -days 365 -nodes \
-        -subj "/CN=$(hostname -I | awk '{print $1}')/O=SisCarEs/C=BR"
+        -subj "/CN=$SERVER_IP/O=SisCarEs/C=BR" \
+        -addext "subjectAltName=DNS:siscares.local,DNS:localhost,IP:127.0.0.1,IP:$SERVER_IP"
     chmod 600 "$CERTS_DIR/key.pem"
     chmod 644 "$CERTS_DIR/cert.pem"
 else
@@ -183,30 +264,32 @@ fi
 # --- 8. Rodar migrações do banco ---
 log "Executando migrações do banco de dados..."
 cd "$BACKEND_DIR"
-alembic upgrade head
+if ! alembic upgrade head; then
+    err "Falha ao executar as migrações do banco de dados."
+    err "Verifique a variável DATABASE_URL em $BACKEND_DIR/.env e se o banco está acessível."
+    exit 1
+fi
 
 # --- 9. Criar diretório de uploads ---
 mkdir -p "$UPLOADS_DIR"
+chmod 755 "$UPLOADS_DIR"
 
 # --- 10. Criar super-admin ---
 echo
 warn "Configuração do super-administrador"
 ADMIN_LOGIN=$(ask "Login do super-admin (padrão admin): " "admin")
 ADMIN_NAME=$(ask "Nome completo do super-admin (padrão Administrador): " "Administrador")
-while true; do
-    ADMIN_PASS=$(ask_secret "Senha do super-admin: ")
-    ADMIN_PASS_CONFIRM=$(ask_secret "Confirme a senha do super-admin: ")
-    if [[ "$ADMIN_PASS" == "$ADMIN_PASS_CONFIRM" && -n "$ADMIN_PASS" ]]; then
-        break
-    fi
-    err "As senhas não coincidem ou estão vazias. Tente novamente."
-done
+ADMIN_PASS=$(ask_secret_confirm "Senha do super-admin: " "Confirme a senha do super-admin: ")
 
 log "Criando super-admin..."
-python "$BACKEND_DIR/scripts/create_superadmin.py" \
+if ! python "$BACKEND_DIR/scripts/create_superadmin.py" \
     --email "$ADMIN_LOGIN" \
     --password "$ADMIN_PASS" \
-    --name "$ADMIN_NAME"
+    --name "$ADMIN_NAME"; then
+    err "Falha ao criar o super-administrador."
+    err "Verifique se as migrações foram executadas e se o banco de dados está acessível."
+    exit 1
+fi
 
 # --- 11. Criar serviço systemd ---
 log "Criando serviço systemd '$SERVICE_NAME'..."

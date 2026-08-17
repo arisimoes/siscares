@@ -30,12 +30,12 @@ def decrypt_qr_payload(token: str) -> Dict[str, Any]:
     return json.loads(decrypted)
 
 
-def generate_qr_code_base64(payload: str, size: int = 4) -> str:
+def generate_qr_code_base64(payload: str, size: int = 6) -> str:
     qr = qrcode.QRCode(
         version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
         box_size=size,
-        border=3,
+        border=4,
     )
     qr.add_data(payload)
     qr.make(fit=True)

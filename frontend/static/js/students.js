@@ -198,11 +198,18 @@ window.openTemporaryCard = async function(studentId, fullName) {
     if (!confirm(`Gerar carteirinha de acesso único para ${fullName}?`)) return;
     try {
         const data = await createTemporaryCard(studentId);
+        const cardState = {
+            student_id: data.student_id,
+            card_id: data.id,
+            validity: data.validity_label,
+            qr_base64: data.qr_base64,
+            generated: data.generated_at,
+        };
+        localStorage.setItem("siscaresTemporaryCardData", JSON.stringify(cardState));
         const params = new URLSearchParams({
             student_id: data.student_id,
             card_id: data.id,
             validity: data.validity_label,
-            qr: data.qr_base64,
             generated: data.generated_at,
         });
         window.open(`/static/pages/temporary-card.html?${params.toString()}`, "_blank");

@@ -1079,15 +1079,16 @@ th { background: #f9fafb; font-weight: 600; }
 }
 
 .card-qrcode {
-    width: 80px;
-    height: 80px;
+    width: 160px;
+    height: 160px;
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     box-sizing: border-box;
-    padding: 4px;
-    image-rendering: pixelated;
+    padding: 8px;
+    image-rendering: auto;
     background: white;
+    border: 1px solid #e5e7eb;
 }
 
 .card-qrcode-hint {

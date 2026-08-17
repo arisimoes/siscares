@@ -49,11 +49,11 @@ def register_attendance(
     is_temporary = qr_data.get("tmp") is True
 
     if is_temporary:
-        qr_date = qr_data.get("date")
+        qr_date = qr_data.get("date") or qr_data.get("d")
         if qr_date != today:
             raise HTTPException(status_code=403, detail="Carteirinha provisória expirada — data inválida")
 
-        expires_at_str = qr_data.get("exp")
+        expires_at_str = qr_data.get("exp") or qr_data.get("e")
         if not expires_at_str:
             raise HTTPException(status_code=400, detail="Carteirinha provisória sem validade")
         try:
@@ -63,7 +63,7 @@ def register_attendance(
         if datetime.now() > expires_at:
             raise HTTPException(status_code=403, detail="Carteirinha provisória expirada — turno encerrado")
 
-        shift_id = qr_data.get("shift")
+        shift_id = qr_data.get("shift") or qr_data.get("s")
         if not shift_id:
             raise HTTPException(status_code=400, detail="Carteirinha provisória sem turno")
     else:

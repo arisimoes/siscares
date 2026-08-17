@@ -202,13 +202,10 @@ def create_temporary_card(
 
     payload_dict = {
         "sid": student.id,
-        "sch": student.school_id,
-        "cls": student.class_id,
-        "act": student.is_active,
         "tmp": True,
-        "date": today_iso,
-        "shift": shift.id,
-        "exp": expires_at.isoformat(),
+        "d": today_iso,
+        "s": shift.id,
+        "e": expires_at.isoformat(),
     }
     encrypted_payload = generate_encrypted_qr_payload(payload_dict=payload_dict)
     qr_b64 = generate_qr_code_base64(encrypted_payload)
