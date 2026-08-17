@@ -160,8 +160,12 @@ log "Criando usuário e banco de dados do SisCarEs..."
 # Gera senha segura sem caracteres que confundem URL/escaping
 DB_PASS=$(generate_password)
 
-CREATE_SQL_FILE="$(mktemp)"
-trap 'rm -f "$CREATE_SQL_FILE"' EXIT
+CREATE_SQL_DIR="/tmp/siscares_install"
+mkdir -p "$CREATE_SQL_DIR"
+chmod 755 "$CREATE_SQL_DIR"
+CREATE_SQL_FILE="$(mktemp -p "$CREATE_SQL_DIR")"
+chmod 644 "$CREATE_SQL_FILE"
+trap 'rm -rf "$CREATE_SQL_DIR"' EXIT
 
 cat > "$CREATE_SQL_FILE" <<'PSQL_EOF'
 DO $$
