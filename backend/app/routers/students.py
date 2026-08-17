@@ -59,7 +59,7 @@ def create_student(
     db.commit()
     db.refresh(student)
 
-    student.encrypted_qr_payload = generate_encrypted_qr_payload(student, compact_signature=True, minimal_payload=True)
+    student.encrypted_qr_payload = generate_encrypted_qr_payload(student, minimal_payload=True)
     db.commit()
     db.refresh(student)
     return student
@@ -123,7 +123,7 @@ def student_qr_text(
     if student.is_transferred_externally:
         raise HTTPException(status_code=403, detail="Carteirinha indisponível — aluno transferido externamente")
     if not student.encrypted_qr_payload:
-        student.encrypted_qr_payload = generate_encrypted_qr_payload(student, compact_signature=True, minimal_payload=True)
+        student.encrypted_qr_payload = generate_encrypted_qr_payload(student, minimal_payload=True)
         db.commit()
     return {"qr_payload": student.encrypted_qr_payload}
 
@@ -140,8 +140,7 @@ def student_card(
     if student.is_transferred_externally:
         raise HTTPException(status_code=403, detail="Carteirinha indisponível — aluno transferido externamente")
     if not student.encrypted_qr_payload:
-        # Usa assinatura HMAC compacta e payload mínimo para facilitar leitura do QR na portaria.
-        student.encrypted_qr_payload = generate_encrypted_qr_payload(student, compact_signature=True, minimal_payload=True)
+        student.encrypted_qr_payload = generate_encrypted_qr_payload(student, minimal_payload=True)
         db.commit()
     # Carteirinhas impressas precisam de alta tolerância a falhas (leitura noturna/portaria).
     import qrcode

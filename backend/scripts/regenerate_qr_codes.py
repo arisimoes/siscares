@@ -31,7 +31,7 @@ def main():
 
         for student in students:
             student.encrypted_qr_payload = generate_encrypted_qr_payload(
-                student, compact_signature=True, minimal_payload=True
+                student, minimal_payload=True
             )
 
         db.commit()

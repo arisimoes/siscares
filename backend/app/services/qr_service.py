@@ -27,7 +27,6 @@ def build_student_qr_payload(student, minimal: bool = False) -> Dict[str, Any]:
 def generate_encrypted_qr_payload(
     student=None,
     payload_dict=None,
-    compact_signature: bool = False,
     minimal_payload: bool = False,
 ) -> str:
     if payload_dict is not None:
@@ -37,28 +36,13 @@ def generate_encrypted_qr_payload(
     else:
         raise ValueError("Informe student ou payload_dict")
 
-    # Assinatura digital do payload: impede forja por outro servidor.
-    from app.core.crypto import sign_value, sign_value_hmac
-    payload_json = json.dumps(payload_dict, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
-    payload_dict["sig"] = sign_value_hmac(payload_json) if compact_signature else sign_value(payload_json)
-
     payload = json.dumps(payload_dict, separators=(",", ":"), ensure_ascii=False)
     return encrypt_value(payload)
 
 
 def decrypt_qr_payload(token: str, verify: bool = True) -> Dict[str, Any]:
     decrypted = decrypt_value(token)
-    data = json.loads(decrypted)
-
-    if verify:
-        signature = data.pop("sig", None)
-        if not signature:
-            raise ValueError("QR code sem assinatura")
-        payload_json = json.dumps(data, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
-        if not verify_signature(payload_json, signature):
-            raise ValueError("Assinatura do QR code inválida")
-
-    return data
+    return json.loads(decrypted)
 
 
 def generate_qr_code_base64(
