@@ -3,6 +3,8 @@ let isProcessing = false;
 let lastScanned = "";
 let scannerStarted = false;
 let scannerInitializing = false;
+let availableShifts = [];
+let currentShift = null;
 
 function logDebug(message, data) {
     const consoleEl = document.getElementById("debugConsole");
@@ -40,11 +42,61 @@ window.copyDebugConsole = async function () {
     }
 };
 
-function getCurrentShift() {
-    const hour = new Date().getHours();
-    if (hour >= 18) return { id: 3, name: "Noturno" };
-    if (hour >= 12) return { id: 2, name: "Vespertino" };
-    return { id: 1, name: "Matutino" };
+async function loadShifts() {
+    try {
+        availableShifts = await listShifts();
+        if (!availableShifts || !availableShifts.length) {
+            logDebug("Nenhum turno cadastrado na escola");
+            return;
+        }
+        currentShift = detectCurrentShift(availableShifts);
+        logDebug("Turnos disponíveis", availableShifts.map(s => ({ id: s.id, name: s.name, start_time: s.start_time, end_time: s.end_time })));
+        logDebug("Turno atual detectado", currentShift);
+    } catch (err) {
+        logDebug("Erro ao carregar turnos", err?.message);
+    }
+}
+
+function _parseTime(value) {
+    if (!value) return null;
+    const [h, m] = value.split(":").map(Number);
+    return { h, m: m || 0 };
+}
+
+function _minutesSinceMidnight(value) {
+    const t = _parseTime(value);
+    return t ? t.h * 60 + t.m : null;
+}
+
+function detectCurrentShift(shifts) {
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    let bestMatch = null;
+    for (const shift of shifts) {
+        const start = _minutesSinceMidnight(shift.start_time);
+        const end = _minutesSinceMidnight(shift.end_time);
+        if (start === null || end === null) continue;
+
+        const inWindow = start < end
+            ? currentMinutes >= start && currentMinutes <= end
+            : currentMinutes >= start || currentMinutes <= end;
+
+        if (inWindow) {
+            bestMatch = shift;
+            break;
+        }
+    }
+
+    // Fallback: se nenhum turno encaixar no horário, escolhe o mais próximo.
+    if (!bestMatch && shifts.length) {
+        bestMatch = shifts.reduce((prev, curr) => {
+            const prevStart = _minutesSinceMidnight(prev.start_time) || 0;
+            const currStart = _minutesSinceMidnight(curr.start_time) || 0;
+            return Math.abs(currStart - currentMinutes) < Math.abs(prevStart - currentMinutes) ? curr : prev;
+        });
+    }
+    return bestMatch;
 }
 
 function canScan() {
@@ -76,9 +128,15 @@ function hideOverlay() {
 
 async function init() {
     logDebug("Inicializando página de chamada");
-    const shift = getCurrentShift();
-    document.getElementById("shiftInfo").textContent = `Turno atual: ${shift.name}`;
-    logDebug("Turno detectado", shift);
+    await loadShifts();
+
+    if (!currentShift) {
+        setStatus("Nenhum turno cadastrado. Cadastre turnos em Turmas > Turnos.", "error");
+        logDebug("Nenhum turno disponível");
+        return;
+    }
+
+    document.getElementById("shiftInfo").textContent = `Turno atual: ${currentShift.name}`;
 
     if (!canScan()) {
         setStatus("Leitura de QR Code permitida apenas entre 6h e 22h.", "error");
@@ -287,12 +345,14 @@ async function onScanSuccess(decodedText) {
     const status = document.getElementById("statusMsg");
 
     try {
-        const shift = getCurrentShift();
-        logDebug("Registrando presença", { shift_id: shift.id, shift_name: shift.name });
+        if (!currentShift) {
+            throw new Error("Turno não detectado");
+        }
+        logDebug("Registrando presença", { shift_id: currentShift.id, shift_name: currentShift.name });
         if (scannerStarted) {
             await scanner.pause();
         }
-        await registerAttendance({ qr_payload: payload, shift_id: shift.id });
+        await registerAttendance({ qr_payload: payload, shift_id: currentShift.id });
         status.textContent = "Presença registrada com sucesso!";
         status.className = "success";
         showOverlay("✓ Presença confirmada!");
