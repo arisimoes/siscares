@@ -6,9 +6,15 @@ from typing import Dict, Any
 from app.core.crypto import encrypt_value, decrypt_value, sign_value, verify_signature
 
 
-def build_student_qr_payload(student) -> Dict[str, Any]:
+def build_student_qr_payload(student, minimal: bool = False) -> Dict[str, Any]:
     # Ano letivo vinculado à turma atual do aluno.
     academic_year = student.class_.year if student.class_ else None
+    if minimal:
+        # Payload mínimo para leitura fácil em câmeras de celular; escola/turma/status resolvidos no servidor.
+        return {
+            "sid": student.id,
+            "year": academic_year,
+        }
     return {
         "sid": student.id,
         "sch": student.school_id,
@@ -18,11 +24,16 @@ def build_student_qr_payload(student) -> Dict[str, Any]:
     }
 
 
-def generate_encrypted_qr_payload(student=None, payload_dict=None, compact_signature: bool = False) -> str:
+def generate_encrypted_qr_payload(
+    student=None,
+    payload_dict=None,
+    compact_signature: bool = False,
+    minimal_payload: bool = False,
+) -> str:
     if payload_dict is not None:
         payload_dict = dict(payload_dict)
     elif student is not None:
-        payload_dict = build_student_qr_payload(student)
+        payload_dict = build_student_qr_payload(student, minimal=minimal_payload)
     else:
         raise ValueError("Informe student ou payload_dict")
 
