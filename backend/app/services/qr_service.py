@@ -18,7 +18,7 @@ def build_student_qr_payload(student) -> Dict[str, Any]:
     }
 
 
-def generate_encrypted_qr_payload(student=None, payload_dict=None) -> str:
+def generate_encrypted_qr_payload(student=None, payload_dict=None, compact_signature: bool = False) -> str:
     if payload_dict is not None:
         payload_dict = dict(payload_dict)
     elif student is not None:
@@ -27,8 +27,9 @@ def generate_encrypted_qr_payload(student=None, payload_dict=None) -> str:
         raise ValueError("Informe student ou payload_dict")
 
     # Assinatura digital do payload: impede forja por outro servidor.
+    from app.core.crypto import sign_value, sign_value_hmac
     payload_json = json.dumps(payload_dict, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
-    payload_dict["sig"] = sign_value(payload_json)
+    payload_dict["sig"] = sign_value_hmac(payload_json) if compact_signature else sign_value(payload_json)
 
     payload = json.dumps(payload_dict, separators=(",", ":"), ensure_ascii=False)
     return encrypt_value(payload)
