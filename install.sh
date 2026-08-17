@@ -33,6 +33,27 @@ generate_crypto_key() {
     python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 }
 
+generate_signing_keys() {
+    python3 -c "
+import base64
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+private_pem = key.private_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PrivateFormat.PKCS8,
+    encryption_algorithm=serialization.NoEncryption()
+)
+public_pem = key.public_key().public_bytes(
+    encoding=serialization.Encoding.PEM,
+    format=serialization.PublicFormat.SubjectPublicKeyInfo
+)
+print(base64.b64encode(private_pem).decode())
+print(base64.b64encode(public_pem).decode())
+"
+}
+
 ask() {
     local prompt="$1"
     local default="${2:-}"
@@ -220,6 +241,11 @@ pip install -r "$BACKEND_DIR/requirements.txt"
 SECRET_KEY=$(generate_secret)
 CRYPTO_KEY=$(generate_crypto_key)
 
+log "Gerando par de chaves RSA para assinatura de QR codes..."
+KEYS=$(generate_signing_keys)
+SIGNING_PRIVATE_KEY=$(echo "$KEYS" | head -n1)
+SIGNING_PUBLIC_KEY=$(echo "$KEYS" | tail -n1)
+
 log "Criando arquivo de configuração .env..."
 cat > "$BACKEND_DIR/.env" <<EOF
 APP_NAME=SisCarEs
@@ -229,6 +255,8 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=480
 DATABASE_URL=$DATABASE_URL
 CRYPTO_KEY=$CRYPTO_KEY
+SIGNING_PRIVATE_KEY=$SIGNING_PRIVATE_KEY
+SIGNING_PUBLIC_KEY=$SIGNING_PUBLIC_KEY
 UPLOAD_DIR=../frontend/static/uploads
 MAX_UPLOAD_SIZE_MB=5
 CORS_ORIGINS=*
