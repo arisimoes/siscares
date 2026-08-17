@@ -4,6 +4,30 @@ let lastScanned = "";
 let scannerStarted = false;
 let scannerInitializing = false;
 
+function logDebug(message, data) {
+    const consoleEl = document.getElementById("debugConsole");
+    if (!consoleEl) return;
+    const timestamp = new Date().toLocaleTimeString("pt-BR", { hour12: false });
+    let line = `[${timestamp}] ${message}`;
+    if (data !== undefined) {
+        try {
+            line += "\n" + JSON.stringify(data, null, 2);
+        } catch {
+            line += "\n" + String(data);
+        }
+    }
+    consoleEl.textContent += line + "\n";
+    consoleEl.scrollTop = consoleEl.scrollHeight;
+    if (typeof console !== "undefined") {
+        console.log(message, data);
+    }
+}
+
+window.clearDebugConsole = function () {
+    const consoleEl = document.getElementById("debugConsole");
+    if (consoleEl) consoleEl.textContent = "";
+};
+
 function getCurrentShift() {
     const hour = new Date().getHours();
     if (hour >= 18) return { id: 3, name: "Noturno" };
@@ -39,21 +63,26 @@ function hideOverlay() {
 }
 
 async function init() {
+    logDebug("Inicializando página de chamada");
     const shift = getCurrentShift();
     document.getElementById("shiftInfo").textContent = `Turno atual: ${shift.name}`;
+    logDebug("Turno detectado", shift);
 
     if (!canScan()) {
         setStatus("Leitura de QR Code permitida apenas entre 6h e 22h.", "error");
+        logDebug("Fora da janela global de leitura (6h-22h)");
         return;
     }
 
     scanner = new Html5Qrcode("reader");
+    logDebug("Scanner Html5Qrcode instanciado");
     const startButton = document.getElementById("startCameraBtn");
     if (startButton) {
         startButton.addEventListener("click", startScanner);
     }
 
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    logDebug("Contexto", { isMobile, secureContext: isSecureCameraContext(), host: location.hostname, protocol: location.protocol });
     if (!isMobile) {
         await startScanner();
     } else {
@@ -63,6 +92,7 @@ async function init() {
 
 async function startScanner() {
     if (scannerInitializing || scannerStarted) return;
+    logDebug("Solicitando início da câmera");
 
     const button = document.getElementById("startCameraBtn");
     if (button) {
@@ -82,6 +112,7 @@ async function startScanner() {
         }
 
         const cameras = await Html5Qrcode.getCameras();
+        logDebug("Câmeras detectadas", cameras.map(c => ({ id: c.id, label: c.label })));
         if (!cameras || !cameras.length) {
             throw new Error("Nenhuma câmera disponível para este dispositivo.");
         }
@@ -97,6 +128,7 @@ async function startScanner() {
         let lastError = null;
         for (const candidate of cameraCandidates) {
             try {
+                logDebug("Tentando câmera", typeof candidate === "string" ? candidate.slice(0, 40) + "..." : candidate);
                 await scanner.start(
                     candidate,
                     {
@@ -113,15 +145,18 @@ async function startScanner() {
                 );
                 scannerStarted = true;
                 setStatus("Câmera pronta. Aponte o QR Code para a leitura.", "success");
+                logDebug("Câmera iniciada com sucesso");
                 return;
             } catch (error) {
                 lastError = error;
+                logDebug("Falha ao iniciar câmera", error?.message || error);
             }
         }
 
         throw lastError || new Error("Não foi possível iniciar a câmera.");
     } catch (error) {
         const message = error?.message || "Não foi possível iniciar a câmera.";
+        logDebug("Erro ao iniciar scanner", message);
         if (message.includes("Permission") || message.includes("perm") || message.includes("denied")) {
             setStatus("Permissão de câmera negada. Libere o acesso no navegador e tente novamente.", "error");
         } else {
@@ -136,35 +171,47 @@ async function startScanner() {
 }
 
 async function onScanSuccess(decodedText) {
-    if (isProcessing) return;
+    if (isProcessing) {
+        logDebug("Scan ignorado: processamento em andamento");
+        return;
+    }
     if (!canScan()) {
         showOverlay("Leitura encerrada até às 6h", "error");
         return;
     }
 
     const payload = decodedText.trim();
+    logDebug("QR lido (raw)", payload.slice(0, 80) + (payload.length > 80 ? "..." : ""));
 
     if (!looksLikeFernet(payload)) {
+        logDebug("Payload não parece Fernet", payload.slice(0, 50));
         return;
     }
 
-    if (payload === lastScanned) return;
+    if (payload === lastScanned) {
+        logDebug("QR repetido ignorado");
+        return;
+    }
 
     isProcessing = true;
     lastScanned = payload;
     const status = document.getElementById("statusMsg");
 
     try {
+        const shift = getCurrentShift();
+        logDebug("Registrando presença", { shift_id: shift.id, shift_name: shift.name });
         if (scannerStarted) {
             await scanner.pause();
         }
-        await registerAttendance({ qr_payload: payload, shift_id: getCurrentShift().id });
+        await registerAttendance({ qr_payload: payload, shift_id: shift.id });
         status.textContent = "Presença registrada com sucesso!";
         status.className = "success";
         showOverlay("✓ Presença confirmada!");
+        logDebug("Presença registrada com sucesso");
         setTimeout(() => window.location.reload(), 1200);
     } catch (err) {
         const msg = err.message || "";
+        logDebug("Erro no registro de presença", msg);
         const isOutOfHours = msg.toLowerCase().includes("fora do horário") || msg.toLowerCase().includes("horário do turno");
         const isDuplicate = msg.toLowerCase().includes("já registrada");
         const isInvalidQr = msg.toLowerCase().includes("qr code") || msg.toLowerCase().includes("inválido") || msg.toLowerCase().includes("corrompido");
@@ -203,10 +250,17 @@ async function onScanSuccess(decodedText) {
 }
 
 function looksLikeFernet(token) {
-    return typeof token === "string" && token.startsWith("gAAAAAB") && token.length > 50;
+    const ok = typeof token === "string" && token.startsWith("gAAAAAB") && token.length > 50;
+    if (!ok) {
+        logDebug("looksLikeFernet rejeitou", token);
+    }
+    return ok;
 }
 
-function onScanFailure() {
+function onScanFailure(error) {
+    // Html5Qrcode chama frequentemente; logar tudo poluiria o console.
+    // Descomente abaixo se quiser ver cada tentativa falha.
+    // logDebug("onScanFailure", error);
 }
 
 document.addEventListener("DOMContentLoaded", init);
