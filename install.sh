@@ -45,8 +45,8 @@ ask_secret() {
     local prompt="$1"
     local answer=""
     read -srp "$prompt" answer
-    echo
-    echo "$answer"
+    echo >&2
+    printf '%s\n' "$answer"
 }
 
 ask_required() {
