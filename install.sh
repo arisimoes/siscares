@@ -262,9 +262,9 @@ if ! python -c "from app.db.base import ensure_schema; ensure_schema()"; then
     exit 1
 fi
 
-log "Executando migrações do banco de dados..."
-if ! alembic upgrade head; then
-    err "Falha ao executar as migrações do banco de dados."
+log "Sincronizando histórico de migrações..."
+if ! alembic stamp head; then
+    err "Falha ao sincronizar o histórico de migrações do banco de dados."
     err "Verifique a variável DATABASE_URL em $BACKEND_DIR/.env e se o banco está acessível."
     exit 1
 fi
