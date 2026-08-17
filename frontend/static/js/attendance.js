@@ -28,6 +28,18 @@ window.clearDebugConsole = function () {
     if (consoleEl) consoleEl.textContent = "";
 };
 
+window.copyDebugConsole = async function () {
+    const consoleEl = document.getElementById("debugConsole");
+    if (!consoleEl) return;
+    try {
+        await navigator.clipboard.writeText(consoleEl.textContent);
+        logDebug("Conteúdo do console copiado para a área de transferência");
+    } catch (err) {
+        logDebug("Falha ao copiar console", err?.message);
+        alert("Não foi possível copiar automaticamente. Selecione o texto manualmente.");
+    }
+};
+
 function getCurrentShift() {
     const hour = new Date().getHours();
     if (hour >= 18) return { id: 3, name: "Noturno" };
