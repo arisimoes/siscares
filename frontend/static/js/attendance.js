@@ -104,6 +104,7 @@ async function init() {
 
 let availableCameras = [];
 let currentCameraIndex = 0;
+let torchOn = false;
 
 function getRearCamera() {
     return availableCameras.find((c, idx) => {
@@ -178,9 +179,11 @@ async function startScanner(preferredCameraId = null, preferredIndex = null) {
                         disableFlip: false,
                         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                         videoConstraints: {
-                            facingMode: candidate && typeof candidate === "object" && candidate.facingMode ? candidate.facingMode : undefined,
+                            facingMode: candidate && typeof candidate === "object" && candidate.facingMode ? candidate.facingMode : "environment",
                             width: { ideal: 1920 },
-                            height: { ideal: 1080 }
+                            height: { ideal: 1080 },
+                            focusMode: "continuous",
+                            exposureMode: "continuous"
                         }
                     },
                     onScanSuccess,
@@ -192,6 +195,7 @@ async function startScanner(preferredCameraId = null, preferredIndex = null) {
                 setStatus("Câmera pronta. Aproxime o QR Code do quadrado e segure firme.", "success");
                 logDebug("Câmera iniciada com sucesso");
                 setupSwitchCameraButton();
+                setupTorchButton();
                 return;
             } catch (error) {
                 lastError = error;
@@ -224,6 +228,35 @@ function setupSwitchCameraButton() {
         logDebug("Trocando câmera manualmente", { index: currentCameraIndex, label: next.label });
         startScanner(next.id, currentCameraIndex);
     };
+}
+
+async function toggleTorch() {
+    const btn = document.getElementById("torchBtn");
+    try {
+        const stream = scanner?._elementRef?.srcObject || document.querySelector("#reader video")?.srcObject;
+        if (!stream) {
+            logDebug("Nenhum stream de vídeo encontrado para lanterna");
+            return;
+        }
+        const track = stream.getVideoTracks()[0];
+        if (!track || !track.getCapabilities().torch) {
+            logDebug("Lanterna não suportada nesta câmera");
+            return;
+        }
+        torchOn = !torchOn;
+        await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+        logDebug("Lanterna", torchOn ? "ligada" : "desligada");
+        if (btn) btn.textContent = torchOn ? "Desligar lanterna" : "Ligar lanterna";
+    } catch (err) {
+        logDebug("Erro ao controlar lanterna", err?.message);
+    }
+}
+
+function setupTorchButton() {
+    const btn = document.getElementById("torchBtn");
+    if (!btn) return;
+    btn.classList.remove("hidden");
+    btn.onclick = toggleTorch;
 }
 
 async function onScanSuccess(decodedText) {
