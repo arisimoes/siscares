@@ -110,7 +110,17 @@ apt-get install -y \
     postgresql-client \
     curl \
     net-tools \
-    acl || true
+    acl \
+    locales || true
+
+log "Configurando locale UTF-8..."
+if ! grep -q "^pt_BR.UTF-8" /etc/locale.gen 2>/dev/null; then
+    echo "pt_BR.UTF-8 UTF-8" >> /etc/locale.gen
+fi
+locale-gen pt_BR.UTF-8
+update-locale LANG=pt_BR.UTF-8 LC_ALL=pt_BR.UTF-8
+export LANG=pt_BR.UTF-8
+export LC_ALL=pt_BR.UTF-8
 
 if ! command -v python3 &>/dev/null; then
     err "python3 não foi encontrado após a instalação. Verifique o gerenciador de pacotes."
@@ -174,7 +184,7 @@ BEGIN
     END IF;
 END \$\$;
 
-SELECT 'CREATE DATABASE $DB_NAME OWNER $DB_USER' WHERE NOT EXISTS (
+SELECT 'CREATE DATABASE $DB_NAME OWNER $DB_USER ENCODING = ''UTF8'' TEMPLATE = template0' WHERE NOT EXISTS (
     SELECT FROM pg_database WHERE datname = '$DB_NAME'
 ) \gexec
 
@@ -306,6 +316,7 @@ User=root
 WorkingDirectory=$BACKEND_DIR
 Environment=PATH=$BACKEND_DIR/.venv/bin
 ExecStart=$BACKEND_DIR/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8443 --ssl-keyfile $CERTS_DIR/key.pem --ssl-certfile $CERTS_DIR/cert.pem
+Environment=LANG=pt_BR.UTF-8 LC_ALL=pt_BR.UTF-8
 Restart=always
 RestartSec=5
 
