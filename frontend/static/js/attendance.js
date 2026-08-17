@@ -137,6 +137,10 @@ async function startScanner() {
         cameraCandidates.push({ facingMode: "environment" });
         cameraCandidates.push({ facingMode: "user" });
 
+        const screenShort = Math.min(window.innerWidth, window.innerHeight) || 360;
+        const qrboxSize = Math.max(200, Math.min(320, Math.floor(screenShort * 0.7)));
+        logDebug("Configuração do leitor", { fps: 15, qrbox: qrboxSize });
+
         let lastError = null;
         for (const candidate of cameraCandidates) {
             try {
@@ -144,12 +148,15 @@ async function startScanner() {
                 await scanner.start(
                     candidate,
                     {
-                        fps: 10,
-                        qrbox: { width: 250, height: 250 },
+                        fps: 15,
+                        qrbox: { width: qrboxSize, height: qrboxSize },
                         aspectRatio: 1.0,
                         disableFlip: false,
+                        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                         videoConstraints: {
-                            facingMode: "environment"
+                            facingMode: "environment",
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
                         }
                     },
                     onScanSuccess,
@@ -269,10 +276,13 @@ function looksLikeFernet(token) {
     return ok;
 }
 
+let failureCount = 0;
 function onScanFailure(error) {
-    // Html5Qrcode chama frequentemente; logar tudo poluiria o console.
-    // Descomente abaixo se quiser ver cada tentativa falha.
-    // logDebug("onScanFailure", error);
+    failureCount++;
+    // Loga a cada 30 falhas para não poluir, mas dá visibilidade se há erro persistente.
+    if (failureCount % 30 === 1) {
+        logDebug("onScanFailure (a cada 30 tentativas)", error);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", init);
