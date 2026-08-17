@@ -222,15 +222,13 @@ SECRET_KEY=$(generate_secret)
 CRYPTO_KEY=$(generate_crypto_key)
 
 log "Criando arquivo de configuração .env..."
-# Escapa '%' como '%%' para compatibilidade com configparser do Alembic
-DATABASE_URL_FOR_ENV="${DATABASE_URL//%/%%}"
 cat > "$BACKEND_DIR/.env" <<EOF
 APP_NAME=SisCarEs
 DEBUG=False
 SECRET_KEY=$SECRET_KEY
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=480
-DATABASE_URL=$DATABASE_URL_FOR_ENV
+DATABASE_URL=$DATABASE_URL
 CRYPTO_KEY=$CRYPTO_KEY
 UPLOAD_DIR=../frontend/static/uploads
 MAX_UPLOAD_SIZE_MB=5

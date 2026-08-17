@@ -11,7 +11,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from app.db.base import Base
 from app.core.config import settings
 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Alembic usa configparser, que interpreta '%' como interpolação.
+# Escapa '%' duplicando-os para que a URL real seja preservada.
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL.replace("%", "%%"))
 
 target_metadata = Base.metadata
 
