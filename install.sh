@@ -21,7 +21,8 @@ warn() { echo -e "${YELLOW}[Aviso]${NC} $*"; }
 err() { echo -e "${RED}[Erro]${NC} $*" >&2; }
 
 generate_password() {
-    python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#$%^&*') for _ in range(24)))"
+    # Apenas alfanumérico: evita URL encoding, escaping no shell e no SQL
+    python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(24)))"
 }
 
 generate_secret() {
@@ -30,10 +31,6 @@ generate_secret() {
 
 generate_crypto_key() {
     python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-}
-
-urlencode() {
-    python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$1"
 }
 
 ask() {
@@ -157,7 +154,7 @@ fi
 # --- 4. Criar banco e usuário ---
 log "Criando usuário e banco de dados do SisCarEs..."
 
-# Gera senha segura sem caracteres que confundem URL/escaping
+# Senha alfanumérica: não precisa de URL encoding nem escaping especial
 DB_PASS=$(generate_password)
 
 CREATE_SQL_DIR="/tmp/siscares_install"
@@ -167,46 +164,38 @@ CREATE_SQL_FILE="$(mktemp -p "$CREATE_SQL_DIR")"
 chmod 644 "$CREATE_SQL_FILE"
 trap 'rm -rf "$CREATE_SQL_DIR"' EXIT
 
-cat > "$CREATE_SQL_FILE" <<'PSQL_EOF'
-DO $$
+cat > "$CREATE_SQL_FILE" <<EOF
+DO \$\$
 BEGIN
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'db_user') THEN
-        CREATE ROLE :db_user WITH LOGIN PASSWORD :'db_pass';
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '$DB_USER') THEN
+        CREATE ROLE $DB_USER WITH LOGIN PASSWORD '$DB_PASS';
     ELSE
-        ALTER ROLE :db_user WITH PASSWORD :'db_pass';
+        ALTER ROLE $DB_USER WITH PASSWORD '$DB_PASS';
     END IF;
-END $$;
+END \$\$;
 
-SELECT 'CREATE DATABASE ' || :'db_name' || ' OWNER ' || :'db_user'
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = :'db_name') \gexec
+SELECT 'CREATE DATABASE $DB_NAME OWNER $DB_USER' WHERE NOT EXISTS (
+    SELECT FROM pg_database WHERE datname = '$DB_NAME'
+) \gexec
 
-GRANT ALL PRIVILEGES ON DATABASE :db_name TO :db_user;
-PSQL_EOF
+GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;
+EOF
 
-run_psql() {
-    if [[ "$DB_MODE" == "L" ]]; then
-        sudo -u postgres psql \
-            -v db_user="$DB_USER" \
-            -v db_name="$DB_NAME" \
-            -v db_pass="$DB_PASS" \
-            -f "$CREATE_SQL_FILE"
-    else
-        psql $DB_CONNECTION \
-            -v db_user="$DB_USER" \
-            -v db_name="$DB_NAME" \
-            -v db_pass="$DB_PASS" \
-            -f "$CREATE_SQL_FILE"
+if [[ "$DB_MODE" == "L" ]]; then
+    if ! sudo -u postgres psql -f "$CREATE_SQL_FILE"; then
+        err "Falha ao criar o usuário/banco de dados do SisCarEs."
+        err "Verifique se o PostgreSQL está acessível e se as credenciais do administrador estão corretas."
+        exit 1
     fi
-}
-
-if ! run_psql; then
-    err "Falha ao criar o usuário/banco de dados do SisCarEs."
-    err "Verifique se o PostgreSQL está acessível e se as credenciais do administrador estão corretas."
-    exit 1
+else
+    if ! psql $DB_CONNECTION -f "$CREATE_SQL_FILE"; then
+        err "Falha ao criar o usuário/banco de dados do SisCarEs."
+        err "Verifique se o PostgreSQL está acessível e se as credenciais do administrador estão corretas."
+        exit 1
+    fi
 fi
 
-DB_PASS_ENCODED=$(urlencode "$DB_PASS")
-DATABASE_URL="postgresql://$DB_USER:$DB_PASS_ENCODED@$DB_HOST:$DB_PORT/$DB_NAME"
+DATABASE_URL="postgresql://$DB_USER:$DB_PASS@$DB_HOST:$DB_PORT/$DB_NAME"
 
 # --- 5. Configurar ambiente Python ---
 log "Configurando ambiente Python..."
