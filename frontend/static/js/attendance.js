@@ -102,14 +102,19 @@ async function init() {
     }
 }
 
-async function startScanner() {
-    if (scannerInitializing || scannerStarted) return;
+let availableCameras = [];
+let currentCameraIndex = 0;
+
+async function startScanner(preferredCameraId = null) {
+    if (scannerInitializing) return;
+    if (scannerStarted && scanner) {
+        await scanner.stop();
+        scannerStarted = false;
+    }
     logDebug("Solicitando início da câmera");
 
     const button = document.getElementById("startCameraBtn");
-    if (button) {
-        button.disabled = true;
-    }
+    if (button) button.disabled = true;
 
     scannerInitializing = true;
     setStatus("Solicitando acesso à câmera...", "warning");
@@ -123,23 +128,27 @@ async function startScanner() {
             throw new Error("Este navegador não suporta acesso à câmera.");
         }
 
-        const cameras = await Html5Qrcode.getCameras();
-        logDebug("Câmeras detectadas", cameras.map(c => ({ id: c.id, label: c.label })));
-        if (!cameras || !cameras.length) {
+        if (!availableCameras.length) {
+            availableCameras = await Html5Qrcode.getCameras();
+        }
+        logDebug("Câmeras detectadas", availableCameras.map(c => ({ id: c.id, label: c.label })));
+        if (!availableCameras || !availableCameras.length) {
             throw new Error("Nenhuma câmera disponível para este dispositivo.");
         }
 
         const cameraCandidates = [];
-        const rearCamera = cameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira") || c.label.toLowerCase().includes("environment"));
+        if (preferredCameraId) cameraCandidates.push(preferredCameraId);
+        const rearCamera = availableCameras.find(c => c.label.toLowerCase().includes("back") || c.label.toLowerCase().includes("traseira") || c.label.toLowerCase().includes("environment"));
         if (rearCamera) cameraCandidates.push(rearCamera.id);
-        if (cameras[0]) cameraCandidates.push(cameras[0].id);
+        if (availableCameras[0]) cameraCandidates.push(availableCameras[0].id);
         cameraCandidates.push({ facingMode: { ideal: "environment" } });
         cameraCandidates.push({ facingMode: "environment" });
         cameraCandidates.push({ facingMode: "user" });
 
+        // qrbox menor: força o QR a ocupar mais do frame e melhora foco em câmeras frágeis.
         const screenShort = Math.min(window.innerWidth, window.innerHeight) || 360;
-        const qrboxSize = Math.max(200, Math.min(320, Math.floor(screenShort * 0.7)));
-        logDebug("Configuração do leitor", { fps: 15, qrbox: qrboxSize });
+        const qrboxSize = Math.max(180, Math.min(260, Math.floor(screenShort * 0.55)));
+        logDebug("Configuração do leitor", { fps: 30, qrbox: qrboxSize });
 
         let lastError = null;
         for (const candidate of cameraCandidates) {
@@ -148,23 +157,25 @@ async function startScanner() {
                 await scanner.start(
                     candidate,
                     {
-                        fps: 15,
+                        fps: 30,
                         qrbox: { width: qrboxSize, height: qrboxSize },
                         aspectRatio: 1.0,
                         disableFlip: false,
                         experimentalFeatures: { useBarCodeDetectorIfSupported: true },
                         videoConstraints: {
-                            facingMode: "environment",
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
                         }
                     },
                     onScanSuccess,
                     onScanFailure
                 );
                 scannerStarted = true;
-                setStatus("Câmera pronta. Aponte o QR Code para a leitura.", "success");
+                const video = document.querySelector("#reader video");
+                logDebug("Resolução do vídeo", video ? { width: video.videoWidth, height: video.videoHeight } : "não disponível");
+                setStatus("Câmera pronta. Aproxime o QR Code do quadrado e segure firme.", "success");
                 logDebug("Câmera iniciada com sucesso");
+                setupSwitchCameraButton();
                 return;
             } catch (error) {
                 lastError = error;
@@ -183,10 +194,20 @@ async function startScanner() {
         }
     } finally {
         scannerInitializing = false;
-        if (button) {
-            button.disabled = false;
-        }
+        if (button) button.disabled = false;
     }
+}
+
+function setupSwitchCameraButton() {
+    const btn = document.getElementById("switchCameraBtn");
+    if (!btn || availableCameras.length < 2) return;
+    btn.classList.remove("hidden");
+    btn.onclick = () => {
+        currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+        const next = availableCameras[currentCameraIndex];
+        logDebug("Trocando câmera manualmente", { index: currentCameraIndex, label: next.label });
+        startScanner(next.id);
+    };
 }
 
 async function onScanSuccess(decodedText) {
