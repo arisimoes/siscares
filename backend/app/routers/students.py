@@ -9,6 +9,7 @@ from app.models import User, Student, Class, School, Shift, TemporaryCard
 from app.schemas import StudentCreate, StudentResponse, StudentUpdate, StudentDeleteRequest, ClassResponse, TemporaryCardResponse
 from app.core.crypto import verify_password
 from app.services.qr_service import generate_encrypted_qr_payload, generate_qr_code_base64
+import qrcode
 
 router = APIRouter(prefix="/students", tags=["students"])
 
@@ -141,7 +142,13 @@ def student_card(
     if not student.encrypted_qr_payload:
         student.encrypted_qr_payload = generate_encrypted_qr_payload(student)
         db.commit()
-    qr_b64 = generate_qr_code_base64(student.encrypted_qr_payload)
+    # Carteirinhas impressas precisam de alta tolerância a falhas (leitura noturna/portaria).
+    import qrcode
+    qr_b64 = generate_qr_code_base64(
+        student.encrypted_qr_payload,
+        size=10,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+    )
     class_ = db.query(Class).filter(Class.id == student.class_id).first()
     school = db.query(School).filter(School.id == student.school_id).first()
     shift = db.query(Shift).filter(Shift.id == class_.shift_id).first() if class_ else None

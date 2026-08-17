@@ -49,10 +49,14 @@ def decrypt_qr_payload(token: str, verify: bool = True) -> Dict[str, Any]:
     return data
 
 
-def generate_qr_code_base64(payload: str, size: int = 8) -> str:
+def generate_qr_code_base64(
+    payload: str,
+    size: int = 8,
+    error_correction=qrcode.constants.ERROR_CORRECT_M,
+) -> str:
     qr = qrcode.QRCode(
         version=None,
-        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        error_correction=error_correction,
         box_size=size,
         border=4,
     )
