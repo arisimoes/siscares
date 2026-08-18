@@ -5,42 +5,8 @@ let scannerStarted = false;
 let scannerInitializing = false;
 let availableShifts = [];
 let currentShift = null;
-
-function logDebug(message, data) {
-    const consoleEl = document.getElementById("debugConsole");
-    if (!consoleEl) return;
-    const timestamp = new Date().toLocaleTimeString("pt-BR", { hour12: false });
-    let line = `[${timestamp}] ${message}`;
-    if (data !== undefined) {
-        try {
-            line += "\n" + JSON.stringify(data, null, 2);
-        } catch {
-            line += "\n" + String(data);
-        }
-    }
-    consoleEl.textContent += line + "\n";
-    consoleEl.scrollTop = consoleEl.scrollHeight;
-    if (typeof console !== "undefined") {
-        console.log(message, data);
-    }
-}
-
-window.clearDebugConsole = function () {
-    const consoleEl = document.getElementById("debugConsole");
-    if (consoleEl) consoleEl.textContent = "";
-};
-
-window.copyDebugConsole = async function () {
-    const consoleEl = document.getElementById("debugConsole");
-    if (!consoleEl) return;
-    try {
-        await navigator.clipboard.writeText(consoleEl.textContent);
-        logDebug("Conteúdo do console copiado para a área de transferência");
-    } catch (err) {
-        logDebug("Falha ao copiar console", err?.message);
-        alert("Não foi possível copiar automaticamente. Selecione o texto manualmente.");
-    }
-};
+let availableCameras = [];
+let torchOn = false;
 
 async function loadShifts() {
     try {
@@ -127,12 +93,10 @@ function hideOverlay() {
 }
 
 async function init() {
-    logDebug("Inicializando página de chamada");
     await loadShifts();
 
     if (!currentShift) {
         setStatus("Nenhum turno cadastrado. Cadastre turnos em Turmas > Turnos.", "error");
-        logDebug("Nenhum turno disponível");
         return;
     }
 
@@ -140,19 +104,16 @@ async function init() {
 
     if (!canScan()) {
         setStatus("Leitura de QR Code permitida apenas entre 6h e 22h.", "error");
-        logDebug("Fora da janela global de leitura (6h-22h)");
         return;
     }
 
     scanner = new Html5Qrcode("reader");
-    logDebug("Scanner Html5Qrcode instanciado");
     const startButton = document.getElementById("startCameraBtn");
     if (startButton) {
-        startButton.addEventListener("click", startScanner);
+        startButton.addEventListener("click", toggleScanner);
     }
 
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    logDebug("Contexto", { isMobile, secureContext: isSecureCameraContext(), host: location.hostname, protocol: location.protocol });
     if (!isMobile) {
         await startScanner();
     } else {
@@ -160,26 +121,41 @@ async function init() {
     }
 }
 
-let availableCameras = [];
-let currentCameraIndex = 0;
-let torchOn = false;
-
 function getRearCamera() {
-    return availableCameras.find((c, idx) => {
+    return availableCameras.find((c) => {
         const label = c.label.toLowerCase();
-        const isRear = label.includes("back") || label.includes("traseira") || label.includes("environment") || label.includes("rear");
-        if (isRear) currentCameraIndex = idx;
-        return isRear;
+        return label.includes("back") || label.includes("traseira") || label.includes("environment") || label.includes("rear");
     });
 }
 
-async function startScanner(preferredCameraId = null, preferredIndex = null) {
-    if (scannerInitializing) return;
-    if (scannerStarted && scanner) {
-        try { await scanner.stop(); } catch (e) { /* ignore */ }
-        scannerStarted = false;
+async function toggleScanner() {
+    if (scannerStarted) {
+        await stopScanner();
+    } else {
+        await startScanner();
     }
-    logDebug("Solicitando início da câmera");
+}
+
+async function stopScanner() {
+    if (!scanner || !scannerStarted) return;
+    try {
+        await scanner.stop();
+    } catch (e) {
+        // ignore
+    }
+    scannerStarted = false;
+    torchOn = false;
+    updateStartButton();
+    setStatus("Câmera desativada.", "warning");
+    const torchBtn = document.getElementById("torchBtn");
+    if (torchBtn) {
+        torchBtn.classList.add("hidden");
+        torchBtn.textContent = "Ligar lanterna";
+    }
+}
+
+async function startScanner(preferredCameraId = null) {
+    if (scannerInitializing || scannerStarted) return;
 
     const button = document.getElementById("startCameraBtn");
     if (button) button.disabled = true;
@@ -199,35 +175,27 @@ async function startScanner(preferredCameraId = null, preferredIndex = null) {
         if (!availableCameras.length) {
             availableCameras = await Html5Qrcode.getCameras();
         }
-        logDebug("Câmeras detectadas", availableCameras.map(c => ({ id: c.id, label: c.label })));
         if (!availableCameras || !availableCameras.length) {
             throw new Error("Nenhuma câmera disponível para este dispositivo.");
         }
 
         const cameraCandidates = [];
-        // 1. Tenta usar facingMode "environment" por constraints (funciona melhor em Android).
         cameraCandidates.push({ facingMode: { exact: "environment" } });
         cameraCandidates.push({ facingMode: "environment" });
-        // 2. Fallback por cameraId, se o usuário preferiu uma específica.
         if (preferredCameraId) {
             cameraCandidates.push(preferredCameraId);
-        } else if (preferredIndex !== null && availableCameras[preferredIndex]) {
-            cameraCandidates.push(availableCameras[preferredIndex].id);
         }
         const rearCamera = getRearCamera();
         if (rearCamera) cameraCandidates.push(rearCamera.id);
         if (availableCameras[0]) cameraCandidates.push(availableCameras[0].id);
         cameraCandidates.push({ facingMode: "user" });
 
-        // qrbox menor: força o QR a ocupar mais do frame e melhora foco em câmeras frágeis.
         const screenShort = Math.min(window.innerWidth, window.innerHeight) || 360;
         const qrboxSize = Math.max(180, Math.min(260, Math.floor(screenShort * 0.55)));
-        logDebug("Configuração do leitor", { fps: 30, qrbox: qrboxSize });
 
         let lastError = null;
         for (const candidate of cameraCandidates) {
             try {
-                logDebug("Tentando câmera", typeof candidate === "string" ? candidate.slice(0, 40) + "..." : candidate);
                 await scanner.start(
                     candidate,
                     {
@@ -248,23 +216,18 @@ async function startScanner(preferredCameraId = null, preferredIndex = null) {
                     onScanFailure
                 );
                 scannerStarted = true;
-                const video = document.querySelector("#reader video");
-                logDebug("Resolução do vídeo", video ? { width: video.videoWidth, height: video.videoHeight } : "não disponível");
                 setStatus("Câmera pronta. Aproxime o QR Code do quadrado e segure firme.", "success");
-                logDebug("Câmera iniciada com sucesso");
-                setupSwitchCameraButton();
+                updateStartButton();
                 setupTorchButton();
                 return;
             } catch (error) {
                 lastError = error;
-                logDebug("Falha ao iniciar câmera", error?.message || error);
             }
         }
 
         throw lastError || new Error("Não foi possível iniciar a câmera.");
     } catch (error) {
         const message = error?.message || "Não foi possível iniciar a câmera.";
-        logDebug("Erro ao iniciar scanner", message);
         if (message.includes("Permission") || message.includes("perm") || message.includes("denied")) {
             setStatus("Permissão de câmera negada. Libere o acesso no navegador e tente novamente.", "error");
         } else {
@@ -272,41 +235,31 @@ async function startScanner(preferredCameraId = null, preferredIndex = null) {
         }
     } finally {
         scannerInitializing = false;
-        if (button) button.disabled = false;
+        if (button) {
+            button.disabled = false;
+            updateStartButton();
+        }
     }
 }
 
-function setupSwitchCameraButton() {
-    const btn = document.getElementById("switchCameraBtn");
-    if (!btn || availableCameras.length < 2) return;
-    btn.classList.remove("hidden");
-    btn.onclick = () => {
-        currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
-        const next = availableCameras[currentCameraIndex];
-        logDebug("Trocando câmera manualmente", { index: currentCameraIndex, label: next.label });
-        startScanner(next.id, currentCameraIndex);
-    };
+function updateStartButton() {
+    const btn = document.getElementById("startCameraBtn");
+    if (!btn) return;
+    btn.textContent = scannerStarted ? "Desativar câmera" : "Ativar câmera";
 }
 
 async function toggleTorch() {
     const btn = document.getElementById("torchBtn");
     try {
         const stream = scanner?._elementRef?.srcObject || document.querySelector("#reader video")?.srcObject;
-        if (!stream) {
-            logDebug("Nenhum stream de vídeo encontrado para lanterna");
-            return;
-        }
+        if (!stream) return;
         const track = stream.getVideoTracks()[0];
-        if (!track || !track.getCapabilities().torch) {
-            logDebug("Lanterna não suportada nesta câmera");
-            return;
-        }
+        if (!track || !track.getCapabilities().torch) return;
         torchOn = !torchOn;
         await track.applyConstraints({ advanced: [{ torch: torchOn }] });
-        logDebug("Lanterna", torchOn ? "ligada" : "desligada");
         if (btn) btn.textContent = torchOn ? "Desligar lanterna" : "Ligar lanterna";
     } catch (err) {
-        logDebug("Erro ao controlar lanterna", err?.message);
+        // ignore
     }
 }
 
@@ -318,27 +271,17 @@ function setupTorchButton() {
 }
 
 async function onScanSuccess(decodedText) {
-    if (isProcessing) {
-        logDebug("Scan ignorado: processamento em andamento");
-        return;
-    }
+    if (isProcessing) return;
     if (!canScan()) {
         showOverlay("Leitura encerrada até às 6h", "error");
         return;
     }
 
     const payload = decodedText.trim();
-    logDebug("QR lido (raw)", payload.slice(0, 80) + (payload.length > 80 ? "..." : ""));
 
-    if (!looksLikeFernet(payload)) {
-        logDebug("Payload não parece Fernet", payload.slice(0, 50));
-        return;
-    }
+    if (!looksLikeFernet(payload)) return;
 
-    if (payload === lastScanned) {
-        logDebug("QR repetido ignorado");
-        return;
-    }
+    if (payload === lastScanned) return;
 
     isProcessing = true;
     lastScanned = payload;
@@ -348,7 +291,6 @@ async function onScanSuccess(decodedText) {
         if (!currentShift) {
             throw new Error("Turno não detectado");
         }
-        logDebug("Registrando presença", { shift_id: currentShift.id, shift_name: currentShift.name });
         if (scannerStarted) {
             await scanner.pause();
         }
@@ -356,11 +298,9 @@ async function onScanSuccess(decodedText) {
         status.textContent = "Presença registrada com sucesso!";
         status.className = "success";
         showOverlay("✓ Presença confirmada!");
-        logDebug("Presença registrada com sucesso");
         setTimeout(() => window.location.reload(), 1200);
     } catch (err) {
         const msg = err.message || "";
-        logDebug("Erro no registro de presença", msg);
         const isOutOfHours = msg.toLowerCase().includes("fora do horário") || msg.toLowerCase().includes("horário do turno");
         const isDuplicate = msg.toLowerCase().includes("já registrada");
         const isInvalidQr = msg.toLowerCase().includes("qr code") || msg.toLowerCase().includes("inválido") || msg.toLowerCase().includes("corrompido");
@@ -399,20 +339,11 @@ async function onScanSuccess(decodedText) {
 }
 
 function looksLikeFernet(token) {
-    const ok = typeof token === "string" && token.startsWith("gAAAAAB") && token.length > 50;
-    if (!ok) {
-        logDebug("looksLikeFernet rejeitou", token);
-    }
-    return ok;
+    return typeof token === "string" && token.startsWith("gAAAAAB") && token.length > 50;
 }
 
-let failureCount = 0;
-function onScanFailure(error) {
-    failureCount++;
-    // Loga a cada 30 falhas para não poluir, mas dá visibilidade se há erro persistente.
-    if (failureCount % 30 === 1) {
-        logDebug("onScanFailure (a cada 30 tentativas)", error);
-    }
+function onScanFailure() {
+    // silently ignored
 }
 
 document.addEventListener("DOMContentLoaded", init);

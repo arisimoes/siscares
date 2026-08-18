@@ -6,49 +6,6 @@
     <title>SisCarEs - Chamada QR</title>
     <link rel="stylesheet" href="/static/css/style.css?v=5">
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <style>
-        .debug-console {
-            margin-top: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            font-family: monospace;
-            font-size: 0.8rem;
-            max-height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-        .debug-console-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0.75rem;
-            background: #333;
-            border-bottom: 1px solid #444;
-            border-radius: 6px 6px 0 0;
-        }
-        .debug-console-header .debug-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .debug-console-header button {
-            background: #555;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 0.25rem 0.5rem;
-            cursor: pointer;
-        }
-        .debug-console pre {
-            margin: 0;
-            padding: 0.75rem;
-            overflow: auto;
-            white-space: pre-wrap;
-            word-break: break-word;
-            flex: 1;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -67,20 +24,8 @@
 
         <div id="reader" class="qr-reader"></div>
         <button id="startCameraBtn" class="btn" type="button">Ativar câmera</button>
-        <button id="switchCameraBtn" class="btn hidden" type="button">Trocar câmera</button>
         <button id="torchBtn" class="btn hidden" type="button">Ligar lanterna</button>
         <p id="statusMsg"></p>
-
-        <div class="debug-console">
-            <div class="debug-console-header">
-                <span>Console de depuração</span>
-                <div class="debug-actions">
-                    <button type="button" onclick="copyDebugConsole()">Copiar</button>
-                    <button type="button" onclick="clearDebugConsole()">Limpar</button>
-                </div>
-            </div>
-            <pre id="debugConsole"></pre>
-        </div>
 
         <div id="scanOverlay" class="scan-overlay">
             <div class="ripple"></div>
@@ -91,6 +36,6 @@
     </main>
 
     <script src="/static/js/api.js?v=20"></script>
-    <script src="/static/js/attendance.js?v=18"></script>
+    <script src="/static/js/attendance.js?v=19"></script>
 </body>
 </html>
