@@ -12,14 +12,11 @@ async function loadShifts() {
     try {
         availableShifts = await listShifts();
         if (!availableShifts || !availableShifts.length) {
-            logDebug("Nenhum turno cadastrado na escola");
             return;
         }
         currentShift = detectCurrentShift(availableShifts);
-        logDebug("Turnos disponíveis", availableShifts.map(s => ({ id: s.id, name: s.name, start_time: s.start_time, end_time: s.end_time })));
-        logDebug("Turno atual detectado", currentShift);
     } catch (err) {
-        logDebug("Erro ao carregar turnos", err?.message);
+        // ignore
     }
 }
 
