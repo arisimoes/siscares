@@ -132,3 +132,18 @@ async function saveCalendarDay(schoolId, data) { return api(`/calendar/school/${
 async function updateCalendarDay(schoolId, dayId, data) { return api(`/calendar/school/${schoolId}/days/${dayId}`, { method: "PUT", body: JSON.stringify(data) }); }
 async function deleteCalendarDay(schoolId, dayId) { return api(`/calendar/school/${schoolId}/days/${dayId}`, { method: "DELETE" }); }
 async function generateDefaultCalendar(schoolId, year) { return api(`/calendar/school/${schoolId}/generate/${year}`, { method: "POST" }); }
+
+async function listMigrationYears() { return api("/migration/available-years"); }
+async function listMigrationClasses(year) { return api(`/migration/classes/${year}`); }
+async function listMigrationStudents(sourceYear, filters = {}) {
+    const params = new URLSearchParams({ source_year: sourceYear });
+    if (filters.class_id) params.set("class_id", filters.class_id);
+    if (filters.name) params.set("name", filters.name);
+    return api(`/migration/students?${params.toString()}`);
+}
+async function migrateStudents(studentIds, targetClassId) {
+    return api("/migration/migrate", {
+        method: "POST",
+        body: JSON.stringify({ student_ids: studentIds, target_class_id: targetClassId }),
+    });
+}

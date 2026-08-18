@@ -8,6 +8,7 @@ const MODULE_LINKS = {
     manage_users: "/static/pages/users.html",
     manage_calendar: "/static/pages/calendar.html",
     manage_logs: "/static/pages/logs.html",
+    manage_migration: "/static/pages/migration.html",
 };
 
 const MODULE_CODE_TO_CARD = {
@@ -15,6 +16,7 @@ const MODULE_CODE_TO_CARD = {
     attendance: "nav-attendance",
     reports: "nav-reports",
     transfers: "nav-transfers",
+    migration: "nav-migration",
     calendar: "nav-calendar",
     logs: "nav-logs",
 };

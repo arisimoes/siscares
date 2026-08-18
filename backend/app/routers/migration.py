@@ -6,7 +6,7 @@ from datetime import datetime
 
 from app.db.session import get_db
 from app.core.security import get_current_user, require_role
-from app.models import User, Student, Class, School, SchoolAcademicYear
+from app.models import User, Student, Class, SchoolAcademicYear
 from app.schemas.migration import (
     MigrationListResponse,
     MigrationSourceClass,
@@ -17,6 +17,7 @@ from app.schemas.migration import (
     MigrationResultItem,
 )
 from app.services.qr_service import generate_encrypted_qr_payload
+from app.models import TransferHistory  # noqa: E402
 
 router = APIRouter(prefix="/migration", tags=["migration"])
 
