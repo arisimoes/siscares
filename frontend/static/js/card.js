@@ -10,12 +10,31 @@ function escapeHtml(text) {
         .replace(/\u0026/g, "\u0026amp;");
 }
 
+async function loadYearFilter() {
+    try {
+        const me = await getMe();
+        if (!me || !me.school_id) return;
+        const years = await listAcademicYears(me.school_id);
+        const select = document.getElementById("yearFilter");
+        const activeYears = years.filter(y => y.is_active).sort((a, b) => b.year - a.year);
+        select.innerHTML = '<option value="">Selecione o ano</option>' +
+            activeYears.map(y => `<option value="${y.year}">${y.year}</option>`).join("");
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 async function loadClassesFilter() {
     try {
+        const year = document.getElementById("yearFilter").value;
         const classes = await listClasses();
         const select = document.getElementById("classFilter");
+        let filtered = classes;
+        if (year) {
+            filtered = classes.filter(c => String(c.year) === year);
+        }
         select.innerHTML = '<option value="">Selecione uma turma</option>' +
-            classes.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"})</option>`).join("");
+            filtered.map(c => `<option value="${c.id}">${c.name} (${c.grade || "-"}) - ${c.year}</option>`).join("");
     } catch (err) {
         console.error(err);
     }
@@ -23,6 +42,7 @@ async function loadClassesFilter() {
 
 async function loadSheet() {
     const classId = document.getElementById("classFilter").value;
+    const year = document.getElementById("yearFilter").value;
     const container = document.getElementById("cardSheet");
     const summary = document.getElementById("pageSummary");
     const totalCardsEl = document.getElementById("totalCards");
@@ -37,7 +57,9 @@ async function loadSheet() {
     }
 
     try {
-        const students = await listStudents({ class_id: classId });
+        const filters = { class_id: classId };
+        if (year) filters.year = year;
+        const students = await listStudents(filters);
         if (!students.length) {
             container.innerHTML = "<p class='empty-state'>Nenhum aluno encontrado nesta turma.</p>";
             container.classList.add('sheet-wrapper');
@@ -228,7 +250,9 @@ async function renderSingleCard() {
 }
 
 async function initCardPage() {
+    await loadYearFilter();
     await loadClassesFilter();
+    document.getElementById("yearFilter").addEventListener("change", loadClassesFilter);
     const params = new URLSearchParams(window.location.search);
     if (params.get("student_id")) {
         renderSingleCard();

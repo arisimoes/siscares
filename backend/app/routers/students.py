@@ -18,6 +18,7 @@ router = APIRouter(prefix="/students", tags=["students"])
 def list_students(
     class_id: int = None,
     shift_id: int = None,
+    year: int = None,
     name: str = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -32,6 +33,8 @@ def list_students(
         query = query.filter(Student.class_id == class_id)
     if shift_id:
         query = query.join(Class, Student.class_id == Class.id).filter(Class.shift_id == shift_id)
+    if year:
+        query = query.join(Class, Student.class_id == Class.id).filter(Class.year == year)
     if name:
         query = query.filter(Student.full_name.ilike(f"%{name}%"))
     for student in query.all():
