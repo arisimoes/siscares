@@ -2,6 +2,16 @@ from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
+from .migration import (
+    MigrationSourceClass,
+    MigrationStudent,
+    MigrationTargetClass,
+    MigrationListResponse,
+    MigrationRequest,
+    MigrationResponse,
+    MigrationResultItem,
+)
+
 
 class SchoolBase(BaseModel):
     name: str
@@ -47,6 +57,7 @@ class UserPermissionBase(BaseModel):
     manage_users: bool = False
     manage_calendar: bool = False
     manage_logs: bool = False
+    manage_migration: bool = False
 
 
 class UserPermissionCreate(BaseModel):
@@ -59,6 +70,7 @@ class UserPermissionCreate(BaseModel):
     manage_users: bool = False
     manage_calendar: bool = False
     manage_logs: bool = False
+    manage_migration: bool = False
 
 
 class UserBase(BaseModel):

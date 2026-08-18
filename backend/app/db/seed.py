@@ -10,6 +10,7 @@ CORE_MODULES = [
     ("transfers", "Histórico de Transferências", "Transferências internas e externas de alunos", False),
     ("calendar", "Calendário", "Módulo reservado para funcionalidades futuras de calendário escolar", False),
     ("logs", "Registros", "Auditoria de transferências e justificativas de faltas", False),
+    ("migration", "Migração de Alunos", "Migração de alunos entre anos letivos e turmas", False),
 ]
 
 

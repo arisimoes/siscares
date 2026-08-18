@@ -43,6 +43,7 @@ PERMISSION_MODULE_MAP = {
     "users": "manage_users",
     "calendar": "manage_calendar",
     "logs": "manage_logs",
+    "migration": "manage_migration",
 }
 
 

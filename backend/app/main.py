@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 
 from app.core.config import settings
 from app.db.base import Base, engine
-from app.routers import auth, schools, classes, students, attendance, modules, reports, transfers, calendar, logs, uploads
+from app.routers import auth, schools, classes, students, attendance, modules, reports, transfers, calendar, logs, uploads, migration
 from app.db import seed
 from app.services.attendance_scheduler import start_attendance_scheduler
 
@@ -34,6 +34,7 @@ app.include_router(reports.router, prefix="/api/v1")
 app.include_router(calendar.router, prefix="/api/v1")
 app.include_router(logs.router, prefix="/api/v1")
 app.include_router(uploads.router, prefix="/api/v1")
+app.include_router(migration.router, prefix="/api/v1")
 
 
 @app.on_event("startup")
@@ -41,6 +42,7 @@ def on_startup():
     from app.db.base import ensure_schema, ensure_column_exists
     ensure_schema()
     ensure_column_exists("students", "is_transferred_externally", "BOOLEAN DEFAULT FALSE")
+    ensure_column_exists("user_permissions", "manage_migration", "BOOLEAN DEFAULT FALSE")
     seed.seed_modules()
     start_attendance_scheduler()
 

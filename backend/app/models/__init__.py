@@ -59,6 +59,7 @@ class UserPermission(Base):
     manage_users = Column(Boolean, default=False)
     manage_calendar = Column(Boolean, default=False)
     manage_logs = Column(Boolean, default=False)
+    manage_migration = Column(Boolean, default=False)
 
     user = relationship("User", back_populates="permissions", passive_deletes=True)
 
