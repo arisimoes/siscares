@@ -77,6 +77,11 @@ def register_attendance(
     if student.is_transferred_externally:
         raise HTTPException(status_code=403, detail="Carteirinha inválida — aluno transferido externamente")
 
+    # Validação extra: matrícula do QR deve bater com o aluno do banco.
+    qr_mat = qr_data.get("mat")
+    if qr_mat and qr_mat != student.registration_code:
+        raise HTTPException(status_code=403, detail="QR Code não corresponde à matrícula do aluno")
+
     today = date.today().isoformat()
     is_temporary = qr_data.get("tmp") is True
 

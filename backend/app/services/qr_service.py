@@ -13,6 +13,7 @@ def build_student_qr_payload(student, minimal: bool = False) -> Dict[str, Any]:
         # Payload mínimo para leitura fácil em câmeras de celular; escola/turma/status resolvidos no servidor.
         return {
             "sid": student.id,
+            "mat": student.registration_code,
             "year": academic_year,
         }
     return {
